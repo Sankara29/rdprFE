@@ -19,7 +19,7 @@ const OverView = () => {
   const gridRef = useRef()
   const { control } = useForm()
   const location = useLocation();
-  const { node_id, GP, village } = location.state || {};
+  const { node_id, GP, village, GPName, village_name, rr_no, pumpHp } = location.state || {};
 
   const [rowData, setRowData] = useState([])
   const [filterRow, setFilterRow] = useState([])
@@ -32,16 +32,16 @@ const OverView = () => {
   const [date, setDate] = useState(null)
 
   const columnDefs = useMemo(() => [
-    { headerName: 'Id', field: 'id', maxWidth: 66 },
-    {
-      headerName: 'Node Id', field: 'node_id', maxWidth: 118,
-      valueGetter: params => {
-        return `${params.data.node_id}`
-      }
-    },
-    { headerName: 'RR_No', field: 'rr_no', maxWidth: 96 },
+    // { headerName: 'Id', field: 'id', maxWidth: 66 },
+    // {
+    //   headerName: 'Node Id', field: 'node_id', maxWidth: 118,
+    //   valueGetter: params => {
+    //     return `${params.data.node_id}`
+    //   }
+    // },
+    { headerName: 'RR No', field: 'rr_no', maxWidth: 96 },
     { headerName: 'Village', field: 'village', maxWidth: 188 },
-    { headerName: 'GP', field: 'GPName', maxWidth: 128 },
+    { headerName: 'Gram panchayat', field: 'GPName', maxWidth: 128 },
     {
       headerName: 'date', field: 'date', maxWidth: 100, valueFormatter: (params) => {
         return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
@@ -57,7 +57,7 @@ const OverView = () => {
       }
     },
     {
-      headerName: 'Water Usage (m³)',
+      headerName: 'Water Supplied (m³)',
       field: 'water_usage',
       maxWidth: 150, headerClass: 'wrap-header',
       cellStyle: { whiteSpace: 'normal', textAlign: 'center' },
@@ -67,7 +67,7 @@ const OverView = () => {
       }, comparator: (a, b) => Math.abs(a) - Math.abs(b)
     },
     {
-      headerName: 'Energy Usage (kWh)',
+      headerName: 'Energy Consumed (kWh)',
       field: 'energy_usage',
       maxWidth: 150, headerClass: 'wrap-header',
       cellStyle: { whiteSpace: 'normal', textAlign: 'center' },
@@ -77,10 +77,10 @@ const OverView = () => {
           parseFloat(params.value).toFixed(2)
         )
       },
-      comparator: (a, b) => (a ?? 0) - (b ?? 0)
+      comparator: (a, b) => (a ?? 0) - (b ?? 0), sort: 'desc'
     },
     {
-      headerName: 'Litre/kWh',
+      headerName: 'Litres/kWh',
       field: 'litr_per_kwh', // You can use a dummy field if needed
       cellStyle: { whiteSpace: 'normal', textAlign: 'center' },
       valueFormatter: params => {
@@ -181,11 +181,12 @@ const OverView = () => {
     const village = event?.data?.village
     const rr_no = event?.data?.rr_no
 
+    const population = event?.data?.population
     const pumpHp = event?.data?.pumpHB
 
     navigate('/dashboard/dailyUse/nodeId/date', {
 
-      state: { node_id: node_id, date: event?.data?.date, GP, village, rr_no, pumpHp }
+      state: { node_id: node_id, date: event?.data?.date, GP, village, rr_no, pumpHp, population }
 
     })
     // setLoad(true)
@@ -197,10 +198,11 @@ const OverView = () => {
     const village = event?.data?.village
     const rr_no = event?.data?.rr_no
     const pumpHp = event?.data?.pumpHB
+    const population = event?.data?.population
     navigate('/dashboard/dailyUse/nodeId/date', {
 
 
-      state: { node_id: node_id, date: event?.data?.date, GP: GP, village: village, rr_no: rr_no, pumpHp }
+      state: { node_id: node_id, date: event?.data?.date, GP: GP, village: village, rr_no: rr_no, pumpHp, population }
 
     })
     // setLoad(true);
@@ -214,18 +216,24 @@ const OverView = () => {
         <BreadcrumbItem active>
           <Link
             to={{
-              pathname: "/dashboard/dailyUse",
+              pathname: "/dashboard/rdprDashboard",
             }}
             state={{ node_id, GP, village }}
           >
-            Daily Usage Water
+            Dashboard
           </Link>
         </BreadcrumbItem>
         <BreadcrumbItem active><a href="/dashboard/dailyUse/nodeId">NodeId</a></BreadcrumbItem>
       </Breadcrumb>
 
-      <h1>Daily Usage Water By NodeId</h1>
-
+      <h2 style={{ marginTop: '20px', fontFamily: 'monospace', lineHeight: '1.6' }}>
+        <span style={{ fontWeight: 'bold' }}>RR NO:</span> {rr_no}  |
+        <span style={{ fontWeight: 'bold' }}>GP Name:</span> {GPName}  |
+        <span style={{ fontWeight: 'bold' }}>Village:</span> {village_name}  |
+        <span style={{ fontWeight: 'bold' }}>Population:</span> {filterRow.length > 0 && filterRow?.[0]?.population} |
+        <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp ?? 15}  |
+        <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id}
+      </h2>
 
 
       {/* AG Grid */}

@@ -12,7 +12,7 @@ const OverView = () => {
     const location = useLocation();
     const navigate = useNavigate()
     const gridRef = useRef()
-    const { node_id, date, GP, village, rr_no, pumpHp } = location.state || {};
+    const { node_id, date, GP, village, rr_no, pumpHp, population } = location.state || {};
     const [loadData, setLoadData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -304,11 +304,11 @@ const OverView = () => {
                 <BreadcrumbItem active>
                     <Link
                         to={{
-                            pathname: "/dashboard/dailyUse",
+                            pathname: "/dashboard/rdprDashboard",
                         }}
                         state={{ node_id, GP }}
                     >
-                        Daily Usage Water
+                        Dashboard
                     </Link>
                 </BreadcrumbItem>
                 <BreadcrumbItem active>
@@ -316,7 +316,7 @@ const OverView = () => {
                         to={{
                             pathname: "/dashboard/dailyUse/nodeId",
                         }}
-                        state={{ node_id, GP }}
+                        state={{ node_id, GPName: GP, village_name: village, rr_no }}
                     >
                         NodeId
                     </Link>
@@ -326,10 +326,11 @@ const OverView = () => {
 
             <div className="nodeDetails">
                 <h2 style={{ marginTop: '20px', fontFamily: 'monospace', lineHeight: '1.6' }}>
-                    <span style={{ fontWeight: 'bold' }}>RR_NO:</span> {rr_no} &nbsp; |
-                    <span style={{ fontWeight: 'bold' }}>GP Name:</span> {GP} &nbsp; |
-                    <span style={{ fontWeight: 'bold' }}>Village:</span> {village} &nbsp; |
-                    <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp} &nbsp; |
+                    <span style={{ fontWeight: 'bold' }}>RR NO:</span> {rr_no} |
+                    <span style={{ fontWeight: 'bold' }}>GP Name:</span> {GP} |
+                    <span style={{ fontWeight: 'bold' }}>Village:</span> {village} |
+                    <span style={{ fontWeight: 'bold' }}>Population:</span> {population} |
+                    <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp} |
                     <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id}
                 </h2>
                 <p style={{

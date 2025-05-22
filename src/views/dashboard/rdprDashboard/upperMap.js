@@ -262,7 +262,7 @@ const NodeMap = () => {
                 {/* <button onClick={handleDownload} style={{ padding: '5px 10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '5px' }}>Download CSV</button> */}
             </div>
 
-            <MapContainer center={[12.9716, 77.5946]} zoom={12} style={{ height: "100%", width: "100%", borderRadius: '10px' }}>
+            <MapContainer center={[13.1, 77.3856]} zoom={12} style={{ height: "100%", width: "100%", borderRadius: '10px' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {feeders.map(feeder => (
                     // <Marker
