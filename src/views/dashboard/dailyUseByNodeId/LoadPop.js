@@ -298,6 +298,7 @@ const OverView = () => {
             isCancelled = true;
         };
     }, [sessions, node_id]);
+    console.log(sessions)
     return (
         <div style={{ width: '100%', height: '100%' }}>
             <Breadcrumb>
@@ -365,7 +366,7 @@ const OverView = () => {
                         borderBottom: '2px solid #3498db',
                         paddingBottom: '6px'
                     }}>
-                        📅 <strong>Date:</strong> {date} &nbsp;&nbsp; ⚡ No Of Sessions: <span style={{ color: '#3498db' }}>{sessions.length}</span>
+                        📅 <strong>Date:</strong> {date} &nbsp;&nbsp; ⚡ No Of Sessions: <span style={{ color: '#3498db' }}>{sessions.filter(s => Array.isArray(s) && s.length > 1).length}</span>
                     </h5>
 
                     <ul style={{

@@ -77,7 +77,8 @@ const OverView = () => {
           parseFloat(params.value).toFixed(2)
         )
       },
-      comparator: (a, b) => (a ?? 0) - (b ?? 0), sort: 'desc'
+      comparator: (a, b) => (a ?? 0) - (b ?? 0), 
+      // sort: 'desc'
     },
     {
       headerName: 'Litres/kWh',
