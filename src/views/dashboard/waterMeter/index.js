@@ -75,7 +75,7 @@ const OverView = () => {
     {
       headerName: `Node Id (🟢 ${recentNodeCount})`,
       field: 'node_id',
-      maxWidth: 150,
+      maxWidth: 180,
       cellRendererFramework: (params) => {
         const dataTime = new Date(params.data.datetime);
         const currentTime = new Date();
