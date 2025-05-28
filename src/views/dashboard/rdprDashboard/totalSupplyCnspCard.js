@@ -476,13 +476,21 @@ const TotalSupplyConsumption = () => {
             setFilterRow(data.data);
 
             // Extract unique values
-            const taluks = [...new Set(data.data.map(item => item.taluk))];
-            const gps = [...new Set(data.data.map(item => item.GPName))];
-            const villages = [...new Set(data.data.map(item => item.village))];
+            // const taluks = [...new Set(data.data.map(item => item.taluk))];
+            // const gps = [...new Set(data.data.map(item => item.GPName))];
+            // const villages = [...new Set(data.data.map(item => item.village))];
+
+            // setTaluk(taluks.map(item => ({ label: item, value: item })));
+            // setGpOptions(gps.map(item => ({ label: item, value: item })));
+            // setVillageOptions(villages.map(item => ({ label: item, value: item })));
+            const taluks = [...new Set(data.data.map(item => item.taluk))].sort();
+            const gps = [...new Set(data.data.map(item => item.GPName))].sort();
+            const villages = [...new Set(data.data.map(item => item.village))].sort();
 
             setTaluk(taluks.map(item => ({ label: item, value: item })));
             setGpOptions(gps.map(item => ({ label: item, value: item })));
             setVillageOptions(villages.map(item => ({ label: item, value: item })));
+
           }
         });
     };
@@ -555,28 +563,55 @@ const TotalSupplyConsumption = () => {
     //   setNodeIdFilter(node_id)
     // }
   }, [GP, village])
+  // useEffect(() => {
+  //   if (selectedGP) {
+  //     const filteredVillages = rowData
+  //       .filter(item => item.GPName === selectedGP.value)
+  //       .map(item => item.village);
+
+  //     const uniqueVillages = [...new Set(filteredVillages)].map(v => ({
+  //       label: v,
+  //       value: v
+  //     }));
+
+  //     setVillageOptions(uniqueVillages);
+  //     setSelectedVillage(null); // clear village when GP changes
+  //   } else {
+  //     // if GP not selected, show all villages
+  //     const allVillages = [...new Set(rowData.map(item => item.village))].map(v => ({
+  //       label: v,
+  //       value: v
+  //     }));
+  //     setVillageOptions(allVillages);
+  //   }
+  // }, [selectedGP, rowData]);
   useEffect(() => {
     if (selectedGP) {
       const filteredVillages = rowData
         .filter(item => item.GPName === selectedGP.value)
         .map(item => item.village);
 
-      const uniqueVillages = [...new Set(filteredVillages)].map(v => ({
-        label: v,
-        value: v
-      }));
+      const uniqueVillages = [...new Set(filteredVillages)]
+        .sort()
+        .map(v => ({
+          label: v,
+          value: v
+        }));
 
       setVillageOptions(uniqueVillages);
       setSelectedVillage(null); // clear village when GP changes
     } else {
-      // if GP not selected, show all villages
-      const allVillages = [...new Set(rowData.map(item => item.village))].map(v => ({
-        label: v,
-        value: v
-      }));
+      // if GP not selected, show all villages sorted
+      const allVillages = [...new Set(rowData.map(item => item.village))]
+        .sort()
+        .map(v => ({
+          label: v,
+          value: v
+        }));
       setVillageOptions(allVillages);
     }
   }, [selectedGP, rowData]);
+
 
   return (
     <Card style={{ width: "118%", padding: '10px' }}>

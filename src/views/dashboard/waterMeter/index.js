@@ -33,6 +33,7 @@ const OverView = () => {
   const [selectedTaluk, setSelectedTaluk] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [recentNodeCount, setRecentNodeCount] = useState(0)
+  const lastRightClickRef = useRef(0)
 
   const calculateRecentNodeCount = () => {
     const now = new Date();
@@ -268,12 +269,16 @@ const OverView = () => {
     if (isMobile) return;
 
     event.event.preventDefault(); // Prevent browser context menu
-
-    const nodeId = event.data?.node_id;
-    if (nodeId) {
-      navigate('/dashboard/watermeter/nodeId', {
-        state: { node_id: nodeId }
-      });
+    const now = Date.now()
+    const delta = now - lastRightClickRef.current
+    lastRightClickRef.current = now
+    if (delta < 400) {
+      const nodeId = event.data?.node_id;
+      if (nodeId) {
+        navigate('/dashboard/watermeter/nodeId', {
+          state: { node_id: nodeId }
+        });
+      }
     }
   };
 

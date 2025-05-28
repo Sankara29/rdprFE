@@ -19,7 +19,8 @@ const OverView = () => {
     const [error, setError] = useState(null);
     const [billData, setBillData] = useState([]);
     const [waterSupplied, setWaterSupplied] = useState([]);
-    const [waterData, setWaterData] = useState([])
+    const [waterData, setWaterData] = useState([]);
+    const [instanData, setInstanData] = useState([]);
 
     const formatDateToComparable = (input) => {
         const d = new Date(input);
@@ -35,7 +36,20 @@ const OverView = () => {
                 if (!res.ok) throw new Error("Failed to fetch data");
                 const data = await res.json();
                 setLoadData(data.data.load || []);
-                setBillData(data.data?.bill)
+                setBillData(data.data?.bill);
+
+                const normalizeDate = (str) => {
+                    const [datePart] = str.split(' ');
+                    const [yyyy, mm, dd] = datePart.split('-');
+                    return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+                };
+
+                const targetDate = normalizeDate(date);
+
+                const instantaneous = data.data?.instantaneous?.filter(entry => {
+                    return normalizeDate(entry.realtimeclock) === targetDate;
+                });
+                setInstanData(instantaneous)
                 setError(null);
             } catch (err) {
                 setError(err.message);
@@ -154,6 +168,7 @@ const OverView = () => {
     }), [])
 
     const billRef = useRef();
+    const instRef = useRef();
     const waterRef = useRef();
     const onGridReady = params => {
         gridRef.current = params.api
@@ -164,6 +179,9 @@ const OverView = () => {
     const onGridReadyBill = (params) => {
         billRef.current = params.api;
     };
+    const onGridReadyInst = (params) => {
+        instRef.current = params.api;
+    }
     const columnDefsWater = useMemo(() => [
         {
             headerName: 'Capture Date',
@@ -240,6 +258,78 @@ const OverView = () => {
         {
             headerName: 'mdvaimp', field: 'mdvaimp', maxWidth: 125, valueFormatter: (params) => {
                 return params.value ? new Intl.NumberFormat('en-US').format((Number(params.value) / 1000)?.toFixed(2)) : '';
+            }
+        },
+    ], [navigate]);
+    const columnDefsInst = useMemo(() => [
+        {
+            headerName: 'Frequency', field: 'frequency', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Date time',
+            field: 'realtimeclock',
+            maxWidth: 250
+            , valueFormatter: (params) => {
+                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+            }
+        },
+        {
+            headerName: 'Kwh', field: 'cumwhimp', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? new Intl.NumberFormat('en-US').format((Number(params.value) / 1000)?.toFixed(2)) : '';
+            }
+        },
+        {
+            headerName: 'Billing Date',
+            field: 'billingdate',
+            maxWidth: 150,
+            valueFormatter: (params) =>
+                params.data.billingdate
+                    ? moment(params.data.billingdate).format('MMM-DD-YYYY')  // Format date and time
+                    : 'N/A'  // Fallback in case of missing value
+        },
+        {
+            headerName: 'Vᵣ', field: 'Rvoltage', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Vᵧ', field: 'Yvoltage', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Vᵦ', field: 'Bvoltage', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Iᵣ', field: 'Rcurrent', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Iᵧ', field: 'Ycurrent', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+        {
+            headerName: 'Iᵦ', field: 'Bcurrent', maxWidth: 120, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
+            }
+        },
+
+
+        {
+            headerName: 'vah', field: 'cumvahimp', maxWidth: 125, valueFormatter: (params) => {
+                return params.value ? new Intl.NumberFormat('en-US').format((Number(params.value) / 1000)?.toFixed(2)) : '';
+            }
+        },
+
+        {
+            headerName: 'powerfailures', field: 'powerfailures', maxWidth: 125, valueFormatter: (params) => {
+                return params.value ? Number(params.value)?.toFixed(2) : '';
             }
         },
     ], [navigate]);
@@ -541,6 +631,30 @@ const OverView = () => {
 
                 )}
                 {waterData.length === 0 && <p>No Water data available for selected date.</p>}
+
+                <h4 style={{ marginTop: '20px' }}>Instantanous Data </h4>
+
+                {instanData.length > 0 && (
+
+
+                    <div className="ag-theme-alpine" style={{ height: '674px', width: '95%', marginTop: '20px' }}>
+                        <AgGridReact
+                            ref={instRef}
+                            rowData={instanData}
+                            columnDefs={columnDefsInst}
+                            animateRows
+                            rowSelection="multiple"
+                            pagination
+                            paginationPageSize={12}
+                            defaultColDef={defaultColDef}
+                            onGridReady={onGridReadyInst}
+                        // onCellContextMenu={handleCellRightClick}
+                        // onCellClicked={handleCellClick}
+                        />
+                    </div>
+
+                )}
+                {instanData.length === 0 && <p>No instantaneous data available for selected date.</p>}
 
                 <h4 style={{ marginTop: '20px' }}>Billing Data</h4>
                 {billData.length > 0 ? (

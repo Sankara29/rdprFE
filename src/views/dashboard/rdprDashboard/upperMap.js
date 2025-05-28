@@ -269,14 +269,14 @@ const NodeMap = () => {
     };
 
     return (
-        <div style={{ width: "80%", height: "80%", position: "relative", borderRadius: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: "95%", margin: '10px 0px', alignItems: 'center' }}>
+        <div style={{ width: "80%", height: "100%", position: "relative", borderRadius: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: "95%", margin: '0px 0px 10px 0px', alignItems: 'center' }}>
                 {/* <h4 onClick={() => router(-1)} style={{ cursor: "pointer" }}>&#x2B05; Back</h4> */}
                 <h4>Map View</h4>
                 {/* <button onClick={handleDownload} style={{ padding: '5px 10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '5px' }}>Download CSV</button> */}
             </div>
 
-            <MapContainer center={[13.1, 77.3856]} zoom={12} style={{ height: "100%", width: "100%", borderRadius: '10px' }}>
+            <MapContainer center={[13.1733649, 77.203690]} zoom={12} style={{ height: "100%", width: "100%", borderRadius: '10px' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 {feeders.map(feeder => (
                     // <Marker
