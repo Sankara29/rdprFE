@@ -18,7 +18,8 @@ const OverView = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [billData, setBillData] = useState([]);
-    const [waterSupplied, setWaterSupplied] = useState([])
+    const [waterSupplied, setWaterSupplied] = useState([]);
+    const [waterData, setWaterData] = useState([])
 
     const formatDateToComparable = (input) => {
         const d = new Date(input);
@@ -46,6 +47,22 @@ const OverView = () => {
 
         fetchLoadData();
     }, [node_id]);
+    useEffect(() => {
+        const fetchWaterData = async () => {
+            if (!node_id || !date) return;
+            const formattedDate = new Date(date).toISOString().split('T')[0];
+            try {
+                const res = await fetch(`${API_URL}/getLiveWaterDataByNodeId?node_id=${node_id}&date=${formattedDate}`);
+                if (!res.ok) throw new Error("Failed to fetch data");
+                const data = await res.json();
+                setWaterData(data.data)
+            } catch (err) {
+                console.log(err)
+            }
+        };
+
+        fetchWaterData();
+    }, [node_id, date])
 
     useEffect(() => {
         if (!date || loadData.length === 0) {
@@ -69,7 +86,13 @@ const OverView = () => {
     };
     const columnDefs = useMemo(() => [
 
-        { headerName: 'Date', field: 'blockdatetime', maxWidth: 156 },
+        {
+            headerName: 'Date', field: 'blockdatetime', maxWidth: 156,
+            // valueFormatter: (params) =>
+            //     params.data.blockdatetime
+            //         ? moment(params.data.blockdatetime).format('MMM-DD-YYYY HH:MM')  // Format date and time
+            //         : 'N/A'  // Fallback in case of missing value
+        },
         {
             headerName: 'Kwh', field: 'blockwhimp', maxWidth: 98, valueFormatter: params => {
                 const formatted = Math.abs(params.value / 1000).toFixed(2);
@@ -77,38 +100,38 @@ const OverView = () => {
             }, comparator: (a, b) => Math.abs(a) - Math.abs(b)
         },
         {
-            headerName: 'Vavgᵣ', // proper Unicode subscript r
+            headerName: 'Vᵣ', // proper Unicode subscript r
             field: 'Ravgvoltage',
             maxWidth: 95,
             valueFormatter: (params) => Number(params.value)?.toFixed(2) || ''
         },
         {
-            headerName: 'Vavgᵧ', // closest to subscript y (actually subscript gamma)
+            headerName: 'Vᵧ', // closest to subscript y (actually subscript gamma)
             field: 'Yavgvoltage',
             maxWidth: 95,
             valueFormatter: (params) => Number(params.value)?.toFixed(2) || ''
         },
         {
-            headerName: 'Vavg<sub>B</sub>', // closest to subscript b (actually subscript beta)
+            headerName: 'V<sub>B</sub>', // closest to subscript b (actually subscript beta)
             field: 'Bavgvoltage',
             maxWidth: 95,
             headerComponentFramework: CustomHeader,
             valueFormatter: (params) => Number(params.value)?.toFixed(2) || ''
         },
         {
-            headerName: 'Iavgᵣ',
+            headerName: 'Iᵣ',
             field: 'Ravgcurrent',
             maxWidth: 95,
             valueFormatter: (params) => Number(params.value)?.toFixed(2) || ''
         },
         {
-            headerName: 'Iavgᵧ',
+            headerName: 'Iᵧ',
             field: 'Yavgcurrent',
             maxWidth: 95,
             valueFormatter: (params) => Number(params.value)?.toFixed(2) || ''
         },
         {
-            headerName: 'Iavg<sub>B</sub>',
+            headerName: 'I<sub>B</sub>',
             field: 'Bavgcurrent',
             maxWidth: 95,
             headerComponentFramework: CustomHeader,
@@ -131,12 +154,46 @@ const OverView = () => {
     }), [])
 
     const billRef = useRef();
+    const waterRef = useRef();
     const onGridReady = params => {
         gridRef.current = params.api
+    }
+    const onGridReadyWater = params => {
+        gridRefWater.current = params.api
     }
     const onGridReadyBill = (params) => {
         billRef.current = params.api;
     };
+    const columnDefsWater = useMemo(() => [
+        {
+            headerName: 'Capture Date',
+            field: 'datetime',
+            maxWidth: 180, valueFormatter: (params) =>
+                params.data.datetime
+                    ? moment(params.data.datetime).format('MMM-DD-YYYY HH:MM')  // Format date and time
+                    : 'N/A'  // Fallback in case of missing value
+
+        },
+        {
+            headerName: 'live data(m³)', field: 'live_water_data', maxWidth: 135, valueGetter: (params) => {
+                const value = params.data.live_water_data;
+                if (value === undefined || value === null) return null;
+
+                const formatted = (Number(value) / 1000).toFixed(2);
+                return new Intl.NumberFormat('en-US').format(formatted);
+            }
+        },
+        { headerName: 'flow rate', field: 'flowrate', maxWidth: 125 },
+        { headerName: 'node_id', field: 'node_id', maxWidth: 125 },
+        {
+            headerName: 'rr_no', field: 'rr_no', maxWidth:
+                125
+        },
+        { headerName: 'village', field: 'village', maxWidth: 150 },
+        { headerName: 'taluk', field: 'taluk', maxWidth: 150 },
+        { headerName: 'district', field: 'district', maxWidth: 125 },
+        { headerName: 'GPName', field: 'GPName', maxWidth: 125 },
+    ], [navigate])
     const columnDefsBill = useMemo(() => [
         {
             headerName: 'Capture Date',
@@ -185,7 +242,7 @@ const OverView = () => {
                 return params.value ? new Intl.NumberFormat('en-US').format((Number(params.value) / 1000)?.toFixed(2)) : '';
             }
         },
-    ], []);
+    ], [navigate]);
     const workingMinutes = useMemo(() => {
         if (!filteredData || filteredData.length === 0) return 0;
 
@@ -298,7 +355,6 @@ const OverView = () => {
             isCancelled = true;
         };
     }, [sessions, node_id]);
-    console.log(sessions)
     return (
         <div style={{ width: '100%', height: '100%' }}>
             <Breadcrumb>
@@ -366,7 +422,7 @@ const OverView = () => {
                         borderBottom: '2px solid #3498db',
                         paddingBottom: '6px'
                     }}>
-                        📅 <strong>Date:</strong> {date} &nbsp;&nbsp; ⚡ No Of Sessions: <span style={{ color: '#3498db' }}>{sessions.filter(s => Array.isArray(s) && s.length > 1).length}</span>
+                        📅 <strong>Date:</strong> {date} &nbsp;&nbsp; ⚡ No Of Sessions: <span style={{ color: '#3498db' }}>{sessions.length}</span>
                     </h5>
 
                     <ul style={{
@@ -462,6 +518,29 @@ const OverView = () => {
                 )}
                 {!loading && !error && filteredData.length === 0 && <p>No load data available for selected date.</p>}
 
+                <h4 style={{ marginTop: '20px' }}>Water Data </h4>
+
+                {waterData.length > 0 && (
+
+
+                    <div className="ag-theme-alpine" style={{ height: '674px', width: '95%', marginTop: '20px' }}>
+                        <AgGridReact
+                            ref={waterRef}
+                            rowData={waterData}
+                            columnDefs={columnDefsWater}
+                            animateRows
+                            rowSelection="multiple"
+                            pagination
+                            paginationPageSize={12}
+                            defaultColDef={defaultColDef}
+                            onGridReady={onGridReadyWater}
+                        // onCellContextMenu={handleCellRightClick}
+                        // onCellClicked={handleCellClick}
+                        />
+                    </div>
+
+                )}
+                {waterData.length === 0 && <p>No Water data available for selected date.</p>}
 
                 <h4 style={{ marginTop: '20px' }}>Billing Data</h4>
                 {billData.length > 0 ? (

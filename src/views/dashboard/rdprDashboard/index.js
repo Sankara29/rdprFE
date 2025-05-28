@@ -15,36 +15,36 @@ const Overview = () => {
 
     return (
         <div>
-                <p style={{color:'#344563',fontWeight:'bold',fontSize:'26px'}}>Overview</p>
-                <p style={{color:'##5e6c84',fontSize:'16px'}}>See insights of RDPR</p>
+            <p style={{ color: '#344563', fontWeight: 'bold', fontSize: '26px' }}>Overview</p>
+            <p style={{ color: '##5e6c84', fontSize: '16px' }}>See insights of RDPR</p>
             <Row>
 
-                <Col  md='6' >
-                    <UpperCard/>
-                    <TotalSupplyConsumption/>
+                <Col md='6' >
+                    {/* <UpperCard/> */}
+                    <TotalSupplyConsumption />
 
                 </Col>
                 <Col md='6' className='d-flex justify-content-end align-items-center'>
-                    <Maps/>
+                    <Maps />
+                </Col>
+                {/* <Col md='3'  >
+                    <MonthlyElectricity />
                 </Col>
                 <Col md='3'  >
-                <MonthlyElectricity/>
-                </Col>
-                <Col md='3'  >
-                <WaterConsumed/>
+                    <WaterConsumed />
                 </Col>
                 <Col md='6'  >
-                <HighestWaterSupplied/>
+                    <HighestWaterSupplied />
                 </Col>
                 <Col md='4'  >
-                <TodaysInstalltionHistory/>
+                    <TodaysInstalltionHistory />
                 </Col>
                 <Col md='4'  >
-                <Complaints/>
+                    <Complaints />
                 </Col>
                 <Col md='4'  >
-                <NoticeBoard/>
-                </Col>
+                    <NoticeBoard />
+                </Col> */}
             </Row>
         </div>
     );

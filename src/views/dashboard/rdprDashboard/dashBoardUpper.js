@@ -46,7 +46,7 @@ const Overview = () => {
 
   const data = [
     { title: 'Pump', value: 661 },
-    { title: 'Energy Meter', value: 137 },
+    { title: 'Energy Meter', value: 136 },
     { title: 'Water Meter', value: 45 }
   ];
 

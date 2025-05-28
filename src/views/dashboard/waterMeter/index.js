@@ -37,7 +37,7 @@ const OverView = () => {
   const calculateRecentNodeCount = () => {
     const now = new Date();
     return filterRow.filter(item => {
-      const capturedTime = new Date(item.datetime);
+      const capturedTime = new Date(item.last_communicated_datetime);
       if (isNaN(capturedTime)) {
         return false;
       }
@@ -77,7 +77,7 @@ const OverView = () => {
       field: 'node_id',
       maxWidth: 180,
       cellRendererFramework: (params) => {
-        const dataTime = new Date(params.data.datetime);
+        const dataTime = new Date(params.data.last_communicated_datetime);
         const currentTime = new Date();
 
         const isToday =
@@ -134,7 +134,7 @@ const OverView = () => {
       }
     },
     {
-      headerName: 'lastSeen', field: 'datetime', maxWidth: 260, valueFormatter: (params) => {
+      headerName: 'lastSeen', field: 'last_communicated_datetime', maxWidth: 260, valueFormatter: (params) => {
         return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
       }
     },
@@ -188,7 +188,7 @@ const OverView = () => {
         .then(data => {
           if (data.statusCode === 200) {
             const sortedData = data.data.sort((a, b) =>
-              new Date(b.datetime) - new Date(a.datetime)
+              new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
             )
             setRowData(sortedData);
             setFilterRow(sortedData);

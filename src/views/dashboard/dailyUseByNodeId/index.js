@@ -30,6 +30,7 @@ const OverView = () => {
   const [nodeIdFilter, setNodeIdFilter] = useState("")
   const [load, setLoad] = useState(false)
   const [date, setDate] = useState(null)
+  const [todayCon, setTodayCon] = useState([])
 
   const columnDefs = useMemo(() => [
     // { headerName: 'Id', field: 'id', maxWidth: 66 },
@@ -77,7 +78,7 @@ const OverView = () => {
           parseFloat(params.value).toFixed(2)
         )
       },
-      comparator: (a, b) => (a ?? 0) - (b ?? 0), 
+      comparator: (a, b) => (a ?? 0) - (b ?? 0),
       // sort: 'desc'
     },
     {
@@ -122,17 +123,20 @@ const OverView = () => {
   useEffect(() => {
     const fetchData = async () => {
 
-      const [waterRes, energyRes] = await Promise.all([
+      const [waterRes, energyRes, todayRes] = await Promise.all([
         fetch(API_URL + `/getDailyWaterUsage?nodeId=${node_id}`),
-        fetch("https://testpms.ms-tech.in/v15/getDlReport")
+        fetch("https://testpms.ms-tech.in/v15/getDlReport"),
+        fetch("https://testpms.ms-tech.in/v15/getLiveDataTemp")
       ])
 
-      const [waterData, energyData] = await Promise.all([
+      const [waterData, energyData, todayData] = await Promise.all([
         waterRes.json(),
-        energyRes.json()
+        energyRes.json(),
+        todayRes.json()
       ])
 
       if (waterData.statusCode === 200 && energyData.statusCode === 200) {
+        setTodayCon(todayData.data)
         const mergedData = waterData.data.map(waterEntry => {
           const match = energyData.data.find(e =>
             e.gwid == waterEntry.node_id &&
@@ -171,7 +175,11 @@ const OverView = () => {
       )
     }
 
-    setFilterRow(filtered)
+    const todays = todayCon.filter((data) => data.node_id == node_id);
+
+    const combined = [{ rr_no: todays?.[0]?.rr_no, node_id: todays?.[0]?.node_id, village: todays?.[0]?.village, GPName: todays?.[0]?.GPName, water_usage: todays?.[0]?.today_water_consumption, energy_usage: todays?.[0]?.today_energy_consumption, date: todays?.[0]?.datetime, pumpHB: filtered?.[1]?.pumpHB }, ...filtered];
+
+    setFilterRow(combined);
   }, [nodeIdFilter, rowData])
 
   const handleCellRightClick = (event) => {
@@ -182,8 +190,8 @@ const OverView = () => {
     const village = event?.data?.village
     const rr_no = event?.data?.rr_no
 
-    const population = event?.data?.population
-    const pumpHp = event?.data?.pumpHB
+    const population = event?.data?.population ? event?.data?.population : filterRow[2].population
+    const pumpHp = event?.data?.pumpHB ? event?.data?.pumpHB : filterRow[2].pumpHB
 
     navigate('/dashboard/dailyUse/nodeId/date', {
 
@@ -198,8 +206,8 @@ const OverView = () => {
     const GP = event?.data?.GPName
     const village = event?.data?.village
     const rr_no = event?.data?.rr_no
-    const pumpHp = event?.data?.pumpHB
-    const population = event?.data?.population
+    const population = event?.data?.population ? event?.data?.population : filterRow[2].population
+    const pumpHp = event?.data?.pumpHB ? event?.data?.pumpHB : filterRow[2].pumpHB
     navigate('/dashboard/dailyUse/nodeId/date', {
 
 
@@ -208,6 +216,7 @@ const OverView = () => {
     })
     // setLoad(true);
   };
+
 
   return (
     <>
@@ -231,8 +240,8 @@ const OverView = () => {
         <span style={{ fontWeight: 'bold' }}>RR NO:</span> {rr_no}  |
         <span style={{ fontWeight: 'bold' }}>GP Name:</span> {GPName}  |
         <span style={{ fontWeight: 'bold' }}>Village:</span> {village_name}  |
-        <span style={{ fontWeight: 'bold' }}>Population:</span> {filterRow.length > 0 && filterRow?.[0]?.population} |
-        <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp ?? 15}  |
+        <span style={{ fontWeight: 'bold' }}>Population:</span> {filterRow.length > 0 && filterRow?.[2]?.population} |
+        <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {filterRow.length > 0 && filterRow?.[2]?.pumpHB}  |
         <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id}
       </h2>
 

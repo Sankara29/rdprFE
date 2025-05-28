@@ -388,7 +388,7 @@ const TotalSupplyConsumption = () => {
   const gridRef = useRef()
   const { control } = useForm()
   const location = useLocation();
-      const { node_id, GP, village } = location.state || {};
+  const { node_id, GP, village } = location.state || {};
   const [rowData, setRowData] = useState([])
   const [filterRow, setFilterRow] = useState([])
   const [district, setDistrict] = useState([])
@@ -396,10 +396,14 @@ const TotalSupplyConsumption = () => {
   const [selectedDistrict, setSelectedDistrict] = useState(null)
   const [selectedTaluk, setSelectedTaluk] = useState(null)
   const [gpOptions, setGpOptions] = useState([]);
-const [villageOptions, setVillageOptions] = useState([]);
+  const [villageOptions, setVillageOptions] = useState([]);
 
-const [selectedGP, setSelectedGP] = useState(null);
-const [selectedVillage, setSelectedVillage] = useState(null);
+  const [selectedGP, setSelectedGP] = useState(null);
+  const [selectedVillage, setSelectedVillage] = useState(null);
+  const [districtOptions, setDistrictOptions] = useState([
+    { label: 'Bangalore', value: 'Bangalore' },
+  ])
+  const [selectedFakeDistrict, setSelectedFakeDistrict] = useState('Bangalore')
 
   const [nodeIdFilter, setNodeIdFilter] = useState("")
   const isMobileDevice = () =>
@@ -414,9 +418,9 @@ const [selectedVillage, setSelectedVillage] = useState(null);
         return `${params.data.node_id}`
       }
     },
-    
+
     {
-      headerName: 'Water-today(m³)', field: 'today_water_consumption', maxWidth: 159,sort: 'desc',
+      headerName: 'Water-today(m³)', field: 'today_water_consumption', maxWidth: 159, sort: 'desc',
       sortIndex: 0, valueGetter: (params) => {
         const value = params.data.today_water_consumption;
         if (value === undefined || value === null) return null;
@@ -440,7 +444,7 @@ const [selectedVillage, setSelectedVillage] = useState(null);
         return params.value ? moment(params.value).format('MMM-DD HH:mm') : '';
       }
     },
-    
+
     { headerName: 'GPName', field: 'GPName', maxWidth: 148 },
     { headerName: 'Taluk', field: 'taluk', maxWidth: 148 },
 
@@ -454,7 +458,7 @@ const [selectedVillage, setSelectedVillage] = useState(null);
     flex: 1,
     filterParams: { buttons: ["apply", "reset"] },
     wrapHeaderText: true, // for AG Grid Enterprise >= 27
-            autoHeaderHeight: true
+    autoHeaderHeight: true
   }), [])
 
   const onGridReady = params => {
@@ -470,92 +474,113 @@ const [selectedVillage, setSelectedVillage] = useState(null);
           if (data.statusCode === 200) {
             setRowData(data.data);
             setFilterRow(data.data);
-  
+
             // Extract unique values
             const taluks = [...new Set(data.data.map(item => item.taluk))];
             const gps = [...new Set(data.data.map(item => item.GPName))];
             const villages = [...new Set(data.data.map(item => item.village))];
-  
+
             setTaluk(taluks.map(item => ({ label: item, value: item })));
             setGpOptions(gps.map(item => ({ label: item, value: item })));
             setVillageOptions(villages.map(item => ({ label: item, value: item })));
           }
         });
     };
-  
+
     fetchData();
-  
+
     const intervalId = setInterval(fetchData, 5 * 60 * 1000);
-  
+
     return () => clearInterval(intervalId);
   }, []);
-  
+
 
 
   useEffect(() => {
     let filtered = [...rowData];
-  
+
     if (nodeIdFilter.trim() !== "") {
       filtered = filtered.filter(item =>
         item.node_id?.toLowerCase().includes(nodeIdFilter.toLowerCase())
       );
     }
-  
+
     if (selectedDistrict) {
       filtered = filtered.filter(item => item.taluk === selectedDistrict.value);
     }
-  
+
     if (selectedGP) {
       filtered = filtered.filter(item => item.GPName === selectedGP.value);
     }
-  
+
     if (selectedVillage) {
       filtered = filtered.filter(item => item.village === selectedVillage.value);
     }
-  
+
     setFilterRow(filtered);
   }, [nodeIdFilter, rowData, selectedDistrict, selectedGP, selectedVillage]);
-  
-    const nextPage = (event) => {
-        const nodeId = event?.node_id
-        const GP = event?.GPName
-        const village = event?.village
-        const rr_no = event?.rr_no
-        // const pumpHp = event?.pumpHB
-        console.log(selectedGP)
-        if (nodeId) {
-            navigate('/dashboard/dailyUse/nodeId', {
-                state: { node_id: nodeId, GP: selectedGP != null && selectedGP?.value, village: selectedVillage != null && selectedVillage.value, rr_no, GPName: GP, village_name: village }
-            })
-        }
+
+  const nextPage = (event) => {
+    const nodeId = event?.node_id
+    const GP = event?.GPName
+    const village = event?.village
+    const rr_no = event?.rr_no
+    // const pumpHp = event?.pumpHB
+    console.log(selectedGP)
+    if (nodeId) {
+      navigate('/dashboard/dailyUse/nodeId', {
+        state: { node_id: nodeId, GP: selectedGP != null && selectedGP?.value, village: selectedVillage != null && selectedVillage.value, rr_no, GPName: GP, village_name: village }
+      })
     }
+  }
 
-    const handleCellRightClick = event => {
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) return
-        event.event.preventDefault()
+  const handleCellRightClick = event => {
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) return
+    event.event.preventDefault()
 
-        nextPage(event.data)
+    nextPage(event.data)
+  }
+  const handleCellClick = (event) => {
+    nextPage(event.data);
+  };
+
+  useEffect(() => {
+    if (GP) {
+      setSelectedGP({ label: GP, value: GP })
     }
-    const handleCellClick = (event) => {
-        nextPage(event.data);
-    };
+    if (village) {
+      setSelectedVillage({ label: village, value: village })
+    }
+    // if (node_id) {
+    //   setNodeIdFilter(node_id)
+    // }
+  }, [GP, village])
+  useEffect(() => {
+    if (selectedGP) {
+      const filteredVillages = rowData
+        .filter(item => item.GPName === selectedGP.value)
+        .map(item => item.village);
 
-    useEffect(() => {
-                if (GP) {
-                    setSelectedGP({ label: GP, value: GP })
-                }
-                if (village) {
-                    setSelectedVillage({ label: village, value: village })
-                }
-                // if (node_id) {
-                //   setNodeIdFilter(node_id)
-                // }
-            }, [GP, village])
+      const uniqueVillages = [...new Set(filteredVillages)].map(v => ({
+        label: v,
+        value: v
+      }));
 
+      setVillageOptions(uniqueVillages);
+      setSelectedVillage(null); // clear village when GP changes
+    } else {
+      // if GP not selected, show all villages
+      const allVillages = [...new Set(rowData.map(item => item.village))].map(v => ({
+        label: v,
+        value: v
+      }));
+      setVillageOptions(allVillages);
+    }
+  }, [selectedGP, rowData]);
 
   return (
-    <Card style={{width:"118%",padding:'10px'}}>
-     
+    <Card style={{ width: "118%", padding: '10px' }}>
+
 
       <h1>Energy & Water Stats Of today</h1>
 
@@ -577,40 +602,51 @@ const [selectedVillage, setSelectedVillage] = useState(null);
           </div>
         </Col>
         <Col md="3">
-  <Label>Taluk</Label>
-  <Select
-    options={taluk}
-    value={selectedDistrict}
-    onChange={setSelectedDistrict}
-    isClearable
-    placeholder="Select Taluk"
-    theme={selectThemeColors}
-  />
-</Col>
+          <Label>District </Label>
+          <Select
+            options={districtOptions}
+            value={selectedFakeDistrict}
+            onChange={setSelectedFakeDistrict}
+            isClearable
+            placeholder="Select District"
+            theme={selectThemeColors}
+          />
+        </Col>
+        <Col md="3">
+          <Label>Taluk</Label>
+          <Select
+            options={taluk}
+            value={selectedDistrict}
+            onChange={setSelectedDistrict}
+            isClearable
+            placeholder="Select Taluk"
+            theme={selectThemeColors}
+          />
+        </Col>
 
-<Col md="3">
-  <Label>GP Name</Label>
-  <Select
-    options={gpOptions}
-    value={selectedGP}
-    onChange={setSelectedGP}
-    isClearable
-    placeholder="Select GP Name"
-    theme={selectThemeColors}
-  />
-</Col>
+        <Col md="3">
+          <Label>GP Name</Label>
+          <Select
+            options={gpOptions}
+            value={selectedGP}
+            onChange={setSelectedGP}
+            isClearable
+            placeholder="Select GP Name"
+            theme={selectThemeColors}
+          />
+        </Col>
 
-<Col md="3">
-  <Label>Village</Label>
-  <Select
-    options={villageOptions}
-    value={selectedVillage}
-    onChange={setSelectedVillage}
-    isClearable
-    placeholder="Select Village"
-    theme={selectThemeColors}
-  />
-</Col>
+        <Col md="3">
+          <Label>Village</Label>
+          <Select
+            options={villageOptions}
+            value={selectedVillage}
+            onChange={setSelectedVillage}
+            isClearable
+            placeholder="Select Village"
+            theme={selectThemeColors}
+          />
+        </Col>
 
       </Row>
 
@@ -628,7 +664,7 @@ const [selectedVillage, setSelectedVillage] = useState(null);
             defaultColDef={defaultColDef}
             onGridReady={onGridReady}
             onCellContextMenu={handleCellRightClick}
-                            onCellClicked={handleCellClick}
+            onCellClicked={handleCellClick}
           />
         </div>
       ) : (

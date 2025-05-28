@@ -160,11 +160,24 @@ const NodeMap = () => {
         );
         let iconPath = "/red.png";
 
+        // if (match) {
+        //     const dataTime = new Date(match.captureddatetime);
+        //     const now = new Date();
+        //     const diffMins = (now - dataTime) / 1000 / 60;
+        //     iconPath = diffMins <= 45 ? "/blue.png" : "/red.png";
+        // }
         if (match) {
             const dataTime = new Date(match.captureddatetime);
             const now = new Date();
+
+            const isSameDay = dataTime.toDateString() === now.toDateString();
             const diffMins = (now - dataTime) / 1000 / 60;
-            iconPath = diffMins <= 45 ? "/blue.png" : "/red.png";
+
+            if (isSameDay) {
+                iconPath = "/blue.png";  // Any time today
+            } else {
+                iconPath = "/red.png";
+            }
         }
 
         return L.icon({
@@ -183,9 +196,10 @@ const NodeMap = () => {
             );
             const dataTime = match ? new Date(match.captureddatetime) : null;
             const now = new Date();
-            const diffMins = match ? (now - dataTime) / 1000 / 60 : Infinity;
+            const isSameDay = dataTime.toDateString() === now.toDateString();
+            // const diffMins = match ? (now - dataTime) / 1000 / 60 : Infinity;
 
-            const communicated = diffMins <= 45;
+            const communicated = isSameDay;
 
             const detailsMatch = liveData.find(item => item.node_id?.slice(-4) === feederId?.slice(-4));
             const billsMatch = bill.length > 0 && bill?.filter(item => item.gwid?.slice(-4) === feederId?.slice(-4));
@@ -273,15 +287,16 @@ const NodeMap = () => {
                     //     click: () => handleMarkerClick(feeder.node_id, feeder),
                     //   }}
                     // >
+                    // <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+                    //   ${feeder.village || "Unknown"}
+                    // </div>
                     <Marker
                         key={feeder.id}
                         position={[feeder.latitude, feeder.longitude]}
                         icon={L.divIcon({
                             html: `
       <div style="display: flex; flex-direction: column; align-items: center;">
-        <div style="background: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: bold;">
-          ${feeder.village || "Unknown"}
-        </div>
+   
         <img src="${getMarkerIcon(feeder.node_id).options.iconUrl}" width="30" height="30" />
       </div>
     `,
