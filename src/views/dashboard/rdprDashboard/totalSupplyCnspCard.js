@@ -424,9 +424,11 @@ const TotalSupplyConsumption = () => {
       sortIndex: 0, valueGetter: (params) => {
         const value = params.data.today_water_consumption;
         if (value === undefined || value === null) return null;
-
-        const formatted = (Number(value) / 1000).toFixed(2);
-        return new Intl.NumberFormat('en-US').format(formatted);
+        return Number(value) / 1000; // return number for sorting
+      },
+      valueFormatter: (params) => {
+        if (params.value === undefined || params.value === null) return '';
+        return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(params.value);
       }
     },
     {
