@@ -22,6 +22,7 @@ const DashboardReportNodeId = lazy(() => import("../../views/dashboard/reportDL"
 const Overall = lazy(() => import('../../views/dashboard/OverAll'));
 const SingleVillage = lazy(() => import('../../views/dashboard/SingleVillage'));
 const Dateload = lazy(() => import("../../views/dashboard/dailyUseByNodeId/LoadPop"))
+const Installed = lazy(() => import("../../views/dashboard/installedStats"))
 const Login = lazy(() => import('../../views/dashboard/login'))
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
@@ -137,7 +138,8 @@ const DashboardRoutes = [
   },
   {
     path: "/dashboard/other",
-    element: <AppBWrapper />,
+    // element: <AppBWrapper />,
+    element: <Installed />
   },
   {
     path: "/dashboard/Overall",

@@ -12,6 +12,7 @@ const OverView = () => {
     const location = useLocation();
     const navigate = useNavigate()
     const gridRef = useRef()
+    const gridRef2 = useRef()
     const { node_id, date, GP, village, rr_no, pumpHp, population } = location.state || {};
     const [loadData, setLoadData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
@@ -21,6 +22,8 @@ const OverView = () => {
     const [waterSupplied, setWaterSupplied] = useState([]);
     const [waterData, setWaterData] = useState([]);
     const [instanData, setInstanData] = useState([]);
+    const [connectId, setConnectionId] = useState(null)
+    const [billingDetails, setBillingDetails] = useState([])
 
     const formatDateToComparable = (input) => {
         const d = new Date(input);
@@ -160,6 +163,51 @@ const OverView = () => {
 
 
     ], [navigate])
+    const columnDefs2 = useMemo(() => [
+        { headerName: 'Bill No', field: 'Billno', maxWidth: 160 },
+        { headerName: 'Connection ID', field: 'Connectionid', maxWidth: 150 },
+        {
+            headerName: 'Billing Date',
+            field: 'MonthId',
+            maxWidth: 180,
+            valueFormatter: (params) => {
+                const year = params.data?.YearOfBill;
+                const month = params.data?.MonthId;
+                return year && month ? moment(`${year}-${month}-01`).format('MMM-YYYY') : '';
+            }
+        },
+        {
+            headerName: 'Status',
+            field: 'Status',
+            maxWidth: 100,
+            cellStyle: { textAlign: 'center' }
+        },
+        {
+            headerName: 'Meter Reading',
+            field: 'MeterReading',
+            maxWidth: 180,
+            cellStyle: { textAlign: 'center' },
+            valueFormatter: params => new Intl.NumberFormat('en-US').format(params.value)
+        },
+        {
+            headerName: 'Consumption (kWh)',
+            field: 'Consumption',
+            maxWidth: 180,
+            cellStyle: { textAlign: 'center' },
+            valueFormatter: params => new Intl.NumberFormat('en-US').format(params.value)
+        },
+        {
+            headerName: 'Reason',
+            field: 'ReasonDesc',
+            maxWidth: 180,
+            cellStyle: { textAlign: 'center' },
+            valueFormatter: params => params.value === "0" ? 'Normal' : params.value
+        }
+    ], [navigate]);
+
+    const onGridReady2 = params => {
+        gridRef2.current = params.api
+    }
 
     const defaultColDef = useMemo(() => ({
         sortable: true,
@@ -445,6 +493,30 @@ const OverView = () => {
             isCancelled = true;
         };
     }, [sessions, node_id]);
+
+
+    useEffect(() => {
+        const fetchConnection = async () => {
+            const res = await fetch(API_URL + "/getrrNoAndConnectionMapp");
+            const data = await res.json();
+            const currentConnectionId = data.data.filter((data) => data.rr_no == rr_no);
+            setConnectionId(currentConnectionId?.[0]?.con_id)
+        }
+        fetchConnection()
+    }, [])
+
+    useEffect(() => {
+
+        if (connectId) {
+            const fetchConnectionDetails = async () => {
+                const res = await fetch(API_URL + `/getBillingDetailsWithConnectionId?con_id=${connectId}`);
+                const data = await res.json();
+                setBillingDetails(data.data)
+            }
+            fetchConnectionDetails()
+        }
+    }, [connectId])
+
     return (
         <div style={{ width: '100%', height: '100%' }}>
             <Breadcrumb>
@@ -478,7 +550,8 @@ const OverView = () => {
                     <span style={{ fontWeight: 'bold' }}>Village:</span> {village} |
                     <span style={{ fontWeight: 'bold' }}>Population:</span> {population} |
                     <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp} |
-                    <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id}
+                    <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id} |
+                    <span style={{ fontWeight: 'bold' }}>Connection ID:</span>{connectId ?? 0}
                 </h2>
                 <p style={{
                     fontSize: '18px',
@@ -493,6 +566,79 @@ const OverView = () => {
                 }}>
                     <strong>Working Time:</strong> {workingMinutes} minutes ({workingHours} hours)
                 </p>
+
+                <div style={{
+                    marginTop: '20px',
+                    padding: '20px',
+                    backgroundColor: '#f0f4f8',
+                    border: '1px solid #ccc',
+                    borderRadius: '12px',
+                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+                    fontFamily: 'Segoe UI, sans-serif',
+                    marginBottom: '30px',
+                    maxWidth: '96%'
+                }}>
+                    <h5 style={{
+                        fontSize: '22px',
+                        fontWeight: '700',
+                        color: '#2c3e50',
+                        marginBottom: '15px',
+                        borderBottom: '2px solid #3498db',
+                        paddingBottom: '8px'
+                    }}>
+                        Start Session
+                    </h5>
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <button style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#3498db',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '16px',
+                            transition: 'background-color 0.3s ease'
+                        }}
+                            onMouseOver={e => e.currentTarget.style.backgroundColor = '#2980b9'}
+                            onMouseOut={e => e.currentTarget.style.backgroundColor = '#3498db'}
+                        >
+                            Read
+                        </button>
+                        <button style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#27ae60',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '16px',
+                            transition: 'background-color 0.3s ease'
+                        }}
+                            onMouseOver={e => e.currentTarget.style.backgroundColor = '#1e8449'}
+                            onMouseOut={e => e.currentTarget.style.backgroundColor = '#27ae60'}
+                        >
+                            Start
+                        </button>
+                        <button style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '16px',
+                            transition: 'background-color 0.3s ease'
+                        }}
+                            onMouseOver={e => e.currentTarget.style.backgroundColor = '#c0392b'}
+                            onMouseOut={e => e.currentTarget.style.backgroundColor = '#e74c3c'}
+                        >
+                            Stop
+                        </button>
+                    </div>
+                </div>
 
                 <div style={{
                     marginTop: '30px',
@@ -676,6 +822,30 @@ const OverView = () => {
                 ) : (<div className="ag-theme-alpine" style={{ height: '14px', width: '70%' }}>
                     <p>No Data Found</p>
                 </div>)}
+
+                <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Billing Details As Per BSCOM</h3>
+                {/* AG Grid */}
+                {billingDetails.length > 0 ? (
+                    <div className="ag-theme-alpine" style={{ height: '674px', width: '95%' }}>
+                        <AgGridReact
+                            ref={gridRef2}
+                            rowData={billingDetails}
+                            columnDefs={columnDefs2}
+                            animateRows
+                            rowSelection="multiple"
+                            pagination
+                            paginationPageSize={10}
+                            defaultColDef={defaultColDef}
+                            onGridReady={onGridReady2}
+                        // onCellContextMenu={handleCellRightClick}
+                        // onCellClicked={handleCellClick}
+                        />
+                    </div>
+                ) : (
+                    <div className="ag-theme-alpine" style={{ height: '674px', width: '70%' }}>
+                        <p>No Data Found</p>
+                    </div>
+                )}
 
             </div>
         </div>

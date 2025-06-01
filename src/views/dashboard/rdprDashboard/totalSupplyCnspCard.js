@@ -411,7 +411,7 @@ const TotalSupplyConsumption = () => {
   const columnDefs = useMemo(() => [
     // { headerName: 'Id', field: 'id', maxWidth: 88 },
     { headerName: 'Village', field: 'village', maxWidth: 148 },
-    // { headerName: 'RR No', field: 'rr_no', maxWidth: 108 },
+    { headerName: 'RR No', field: 'rr_no', maxWidth: 108 },
     {
       headerName: 'Node Id', field: 'node_id', maxWidth: 140,
       valueGetter: params => {
@@ -420,7 +420,7 @@ const TotalSupplyConsumption = () => {
     },
 
     {
-      headerName: 'Water-today(m³)', field: 'today_water_consumption', maxWidth: 159, sort: 'desc',
+      headerName: 'Water-today(m³)', field: 'today_water_consumption', maxWidth: 259, sort: 'desc',
       sortIndex: 0, valueGetter: (params) => {
         const value = params.data.today_water_consumption;
         if (value === undefined || value === null) return null;
@@ -432,7 +432,7 @@ const TotalSupplyConsumption = () => {
       }
     },
     {
-      headerName: 'Energy-today(Kwh)', field: 'today_energy_consumption', maxWidth: 148, valueGetter: (params) => {
+      headerName: 'Energy-today(Kwh)', field: 'today_energy_consumption', maxWidth: 248, valueGetter: (params) => {
         const value = params.data.today_energy_consumption;
         if (value === undefined || value === null || value === 'Null') return null;
 
@@ -442,7 +442,7 @@ const TotalSupplyConsumption = () => {
     },
     // { headerName: 'Flowrate(m³/h)', field: 'flowrate', maxWidth: 148 },
     {
-      headerName: 'Last Seen', field: 'datetime', maxWidth: 320, valueFormatter: (params) => {
+      headerName: 'Last Seen', field: 'datetime', maxWidth: 220, valueFormatter: (params) => {
         return params.value ? moment(params.value).format('MMM-DD HH:mm') : '';
       }
     },

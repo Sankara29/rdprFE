@@ -19,14 +19,14 @@ const Overview = () => {
             <p style={{ color: '##5e6c84', fontSize: '16px' }}>See insights of RDPR</p>
             <Row>
 
-                <Col md='6' >
+                <Col md='10' >
                     {/* <UpperCard/> */}
                     <TotalSupplyConsumption />
 
                 </Col>
-                <Col md='6' className='d-flex justify-content-end align-items-center'>
+                {/* <Col md='6' className='d-flex justify-content-end align-items-center'>
                     <Maps />
-                </Col>
+                </Col> */}
                 {/* <Col md='3'  >
                     <MonthlyElectricity />
                 </Col>

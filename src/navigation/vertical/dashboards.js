@@ -17,12 +17,12 @@ export default [
     icon: <Monitor size={12} />,
     navLink: '/dashboard/rdprDashboard'
   },
-  {
-    id: 'controlPanel',
-    title: 'Control Panel',
-    icon: <Settings size={12} />,
-    navLink: '/dashboard/controlPanel'
-  },
+  // {
+  //   id: 'controlPanel',
+  //   title: 'Control Panel',
+  //   icon: <Settings size={12} />,
+  //   navLink: '/dashboard/controlPanel'
+  // },
   {
     id: 'Overall',
     title: 'Overall',

@@ -17,6 +17,7 @@ import LoadPop from './LoadPop'
 const OverView = () => {
   const navigate = useNavigate()
   const gridRef = useRef()
+  const gridRef2 = useRef()
   const { control } = useForm()
   const location = useLocation();
   const { node_id, GP, village, GPName, village_name, rr_no, pumpHp } = location.state || {};
@@ -30,16 +31,12 @@ const OverView = () => {
   const [nodeIdFilter, setNodeIdFilter] = useState("")
   const [load, setLoad] = useState(false)
   const [date, setDate] = useState(null)
-  const [todayCon, setTodayCon] = useState([])
+  const [todayCon, setTodayCon] = useState([]);
+  const [connectId, setConnectionId] = useState(null)
+  const [billingDetails, setBillingDetails] = useState([])
 
   const columnDefs = useMemo(() => [
-    // { headerName: 'Id', field: 'id', maxWidth: 66 },
-    // {
-    //   headerName: 'Node Id', field: 'node_id', maxWidth: 118,
-    //   valueGetter: params => {
-    //     return `${params.data.node_id}`
-    //   }
-    // },
+
     { headerName: 'RR No', field: 'rr_no', maxWidth: 96 },
     { headerName: 'Village', field: 'village', maxWidth: 188 },
     { headerName: 'Gram panchayat', field: 'GPName', maxWidth: 128 },
@@ -107,6 +104,48 @@ const OverView = () => {
 
 
   ], [navigate])
+  const columnDefs2 = useMemo(() => [
+    { headerName: 'Bill No', field: 'Billno', maxWidth: 160 },
+    { headerName: 'Connection ID', field: 'Connectionid', maxWidth: 150 },
+    {
+      headerName: 'Billing Date',
+      field: 'MonthId',
+      maxWidth: 180,
+      valueFormatter: (params) => {
+        const year = params.data?.YearOfBill;
+        const month = params.data?.MonthId;
+        return year && month ? moment(`${year}-${month}-01`).format('MMM-YYYY') : '';
+      }
+    },
+    {
+      headerName: 'Status',
+      field: 'Status',
+      maxWidth: 100,
+      cellStyle: { textAlign: 'center' }
+    },
+    {
+      headerName: 'Meter Reading',
+      field: 'MeterReading',
+      maxWidth: 180,
+      cellStyle: { textAlign: 'center' },
+      valueFormatter: params => new Intl.NumberFormat('en-US').format(params.value)
+    },
+    {
+      headerName: 'Consumption (kWh)',
+      field: 'Consumption',
+      maxWidth: 180,
+      cellStyle: { textAlign: 'center' },
+      valueFormatter: params => new Intl.NumberFormat('en-US').format(params.value)
+    },
+    {
+      headerName: 'Reason',
+      field: 'ReasonDesc',
+      maxWidth: 180,
+      cellStyle: { textAlign: 'center' },
+      valueFormatter: params => params.value === "0" ? 'Normal' : params.value
+    }
+  ], [navigate]);
+
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -117,6 +156,9 @@ const OverView = () => {
 
   const onGridReady = params => {
     gridRef.current = params.api
+  }
+  const onGridReady2 = params => {
+    gridRef2.current = params.api
   }
 
   // Fetch data
@@ -162,6 +204,28 @@ const OverView = () => {
 
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, [node_id])
+
+  useEffect(() => {
+    const fetchConnection = async () => {
+      const res = await fetch(API_URL + "/getrrNoAndConnectionMapp");
+      const data = await res.json();
+      const currentConnectionId = data.data.filter((data) => data.rr_no == rr_no);
+      setConnectionId(currentConnectionId?.[0]?.con_id)
+    }
+    fetchConnection()
+  }, [])
+
+  useEffect(() => {
+
+    if (connectId) {
+      const fetchConnectionDetails = async () => {
+        const res = await fetch(API_URL + `/getBillingDetailsWithConnectionId?con_id=${connectId}`);
+        const data = await res.json();
+        setBillingDetails(data.data)
+      }
+      fetchConnectionDetails()
+    }
+  }, [connectId])
 
   // Filter logic
   useEffect(() => {
@@ -242,10 +306,11 @@ const OverView = () => {
         <span style={{ fontWeight: 'bold' }}>Village:</span> {village_name}  |
         <span style={{ fontWeight: 'bold' }}>Population:</span> {filterRow.length > 0 && filterRow?.[2]?.population} |
         <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {filterRow.length > 0 && filterRow?.[2]?.pumpHB}  |
-        <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id}
+        <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id} |
+        <span style={{ fontWeight: 'bold' }}>Connection ID:</span>{connectId ?? 0}
       </h2>
 
-
+      <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Day Wise Energy & Water Status</h3>
       {/* AG Grid */}
       {filterRow.length > 0 ? (
         <div className="ag-theme-alpine" style={{ height: '674px', width: '95%' }}>
@@ -256,7 +321,7 @@ const OverView = () => {
             animateRows
             rowSelection="multiple"
             pagination
-            paginationPageSize={12}
+            paginationPageSize={10}
             defaultColDef={defaultColDef}
             onGridReady={onGridReady}
             onCellContextMenu={handleCellRightClick}
@@ -269,15 +334,29 @@ const OverView = () => {
         </div>
       )}
 
-      {/* {node_id && (<Modal isOpen={load}
-        toggle={() => setLoad(!load)} className="" style={{ maxWidth: '95%', width: '1400px' }}>
-        <ModalHeader className="modal-lg" toggle={() => setLoad(!load)} ></ModalHeader>
-        <ModalBody className="pb-3 px-sm-1 mx-20">
-          <div>
-            <LoadPop node_id={node_id} date={date} />
-          </div>
-        </ModalBody>
-      </Modal>)} */}
+      <h3 style={{ marginTop: '20px', marginBottom: '20px' }}>Billing Details As Per BSCOM</h3>
+      {/* AG Grid */}
+      {billingDetails.length > 0 ? (
+        <div className="ag-theme-alpine" style={{ height: '674px', width: '95%' }}>
+          <AgGridReact
+            ref={gridRef2}
+            rowData={billingDetails}
+            columnDefs={columnDefs2}
+            animateRows
+            rowSelection="multiple"
+            pagination
+            paginationPageSize={10}
+            defaultColDef={defaultColDef}
+            onGridReady={onGridReady2}
+          // onCellContextMenu={handleCellRightClick}
+          // onCellClicked={handleCellClick}
+          />
+        </div>
+      ) : (
+        <div className="ag-theme-alpine" style={{ height: '674px', width: '70%' }}>
+          <p>No Data Found</p>
+        </div>
+      )}
     </>
   )
 }
