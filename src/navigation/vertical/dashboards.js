@@ -29,12 +29,12 @@ export default [
     icon: <Settings size={12} />,
     navLink: '/dashboard/overall'
   },
-  {
-    id: 'live Data',
-    title: 'todays Data',
-    icon: <Clock size={12} />,
-    navLink: '/dashboard/liveData'
-  },
+  // {
+  //   id: 'live Data',
+  //   title: 'todays Data',
+  //   icon: <Clock size={12} />,
+  //   navLink: '/dashboard/liveData'
+  // },
   {
     id: 'energymeter',
     title: 'Energy Meter',
@@ -48,12 +48,12 @@ export default [
     navLink: '/dashboard/waterMeter'
   },
 
-  {
-    id: 'Daily usage',
-    title: 'Daily usage',
-    icon: <Target size={12} />,
-    navLink: '/dashboard/dailyUse'
-  },
+  // {
+  //   id: 'Daily usage',
+  //   title: 'Daily usage',
+  //   icon: <Target size={12} />,
+  //   navLink: '/dashboard/dailyUse'
+  // },
   {
     id: 'Report',
     title: 'Billing Report',

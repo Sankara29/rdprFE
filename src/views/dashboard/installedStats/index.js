@@ -53,14 +53,14 @@ const OverView = () => {
         { headerName: 'Taluk', field: 'taluk', maxWidth: 200 },
         { headerName: 'GP Name', field: 'GPName', maxWidth: 200 },
         { headerName: 'Village Name', field: 'village', maxWidth: 200 },
-        { headerName: 'RR No', field: 'rr_no', maxWidth: 138 },
+        { headerName: 'RR No', field: 'rr_no', maxWidth: 108 },
         {
             headerName: 'Updated At', field: 'updated_at', maxWidth: 200, valueFormatter: (params) => {
 
                 return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
             }
         },
-
+        { headerName: 'Node Id', field: 'node_id', maxWidth: 200 },
         {
             headerName: 'Water Meter',
             field: 'has_water_meter',
@@ -115,40 +115,135 @@ const OverView = () => {
     }
 
     // Fetch data
+    // useEffect(() => {
+    //     const fetchData = () => {
+    //         fetch('https://testhotel2.prysmcable.com/v25/getStatus')
+    //             .then(res => res.json())
+    //             .then(data => {
+    //                 if (data.statusCode === 200) {
+
+    //                     setRowData(data.data)
+
+    //                     console.log(data.data, "4")
+    //                     setFilterRow(data.data)
+
+    //                     const getUniqueOptions = (arr, key) => [...new Set(arr.map(item => item[key]))]
+    //                         .map(val => ({ label: val, value: val }))
+
+    //                     setDistrictOptions(getUniqueOptions(data.data, 'district'))
+    //                     setTalukOptions(getUniqueOptions(data.data, 'taluk'))
+    //                     setGpOptions(getUniqueOptions
+    //                         (data.data, 'GPName')
+    //                     )
+    //                     setVillageOptions(getUniqueOptions(data.data, 'village'))
+    //                     setrowGP(getUniqueOptions
+    //                         (data.data, 'GPName')
+    //                     )
+    //                     setrowVillage(getUniqueOptions(data.data, 'village'))
+    //                 }
+    //             })
+    //     }
+
+    //     fetchData(); // Initial fetch on mount
+
+    //     const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Every 5 mins
+
+    //     return () => clearInterval(intervalId); // Cleanup on unmount
+    // }, [])
+    // useEffect(() => {
+    //     const fetchStarterNodes = async () => {
+    //         try {
+    //             const res = await fetch('https://testhotel2.prysmcable.com/v25/getAllStarterNodes')
+    //             const result = await res.json()
+
+    //             if (result.statusCode === 200 && Array.isArray(result.data)) {
+    //                 const nodeMap = {}
+    //                 result.data.forEach(item => {
+    //                     if (item.rr_no) {
+    //                         nodeMap[item.rr_no] = item.node_id
+    //                     }
+    //                 })
+
+    //                 setRowData(prev =>
+    //                     prev.map(row => ({
+    //                         ...row,
+    //                         node_id: nodeMap[row.rr_no] || '' // Assign matched node_id
+    //                     }))
+    //                 )
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching starter nodes:', error)
+    //         }
+    //     }
+
+    //     fetchStarterNodes()
+    // }, [])
     useEffect(() => {
-        const fetchData = () => {
-            fetch('https://testhotel2.prysmcable.com/v25/getStatus')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.statusCode === 200) {
+        const fetchData = async () => {
+            try {
+                // Fetch both datasets in parallel
+                const [statusRes, starterRes] = await Promise.all([
+                    fetch('https://testhotel2.prysmcable.com/v25/getStatus'),
+                    fetch('https://testhotel2.prysmcable.com/v25/getAllStarterNodes')
+                ])
 
-                        setRowData(data.data)
+                const statusData = await statusRes.json()
+                const starterData = await starterRes.json()
 
-                        console.log(data.data, "4")
-                        setFilterRow(data.data)
+                if (statusData.statusCode === 200 && Array.isArray(statusData.data)) {
+                    const rawData = statusData.data
 
-                        const getUniqueOptions = (arr, key) => [...new Set(arr.map(item => item[key]))]
-                            .map(val => ({ label: val, value: val }))
-
-                        setDistrictOptions(getUniqueOptions(data.data, 'district'))
-                        setTalukOptions(getUniqueOptions(data.data, 'taluk'))
-                        setGpOptions(getUniqueOptions
-                            (data.data, 'GPName')
-                        )
-                        setVillageOptions(getUniqueOptions(data.data, 'village'))
-                        setrowGP(getUniqueOptions
-                            (data.data, 'GPName')
-                        )
-                        setrowVillage(getUniqueOptions(data.data, 'village'))
+                    // Create rr_no → node_id map
+                    const nodeMap = {}
+                    if (starterData.statusCode === 200 && Array.isArray(starterData.data)) {
+                        starterData.data.forEach(item => {
+                            if (item.rr_no) {
+                                nodeMap[item.rr_no] = item.node_id
+                            }
+                        })
                     }
-                })
+
+                    // Merge node_id into rawData
+                    const mergedData = rawData.map(item => ({
+                        ...item,
+                        node_id: nodeMap[item.rr_no] || ''
+                    }))
+
+                    // Sort by captureddatetime (if needed) and trim date
+                    // const sortedData = mergedData;
+                    const priorityRRNOs = ['DPWP06', 'DPWP42', 'TWP261', 'TWP240', 'TWP144', 'TWP503', 'TWP444', 'DPP242', 'TWP489', 'ALA1', 'TWP371', 'TP1044', 'TWP168', 'DPP267',]
+                    const sortedData = mergedData.sort((a, b) => {
+                        const indexA = priorityRRNOs.indexOf(a.rr_no);
+                        const indexB = priorityRRNOs.indexOf(b.rr_no);
+
+                        if (indexA !== -1 && indexB !== -1) {
+                            return indexA - indexB; // both in priority list → keep priority order
+                        }
+                        if (indexA !== -1) return -1; // a is in priority list
+                        if (indexB !== -1) return 1;  // b is in priority list
+                        return 0; // neither in priority list → maintain original relative order
+                    });
+                    setRowData(sortedData)
+                    setFilterRow(sortedData)
+
+                    const getUniqueOptions = (arr, key) => [...new Set(arr.map(item => item[key]))]
+                        .map(val => ({ label: val, value: val }))
+
+                    setDistrictOptions(getUniqueOptions(sortedData, 'district'))
+                    setTalukOptions(getUniqueOptions(sortedData, 'taluk'))
+                    setGpOptions(getUniqueOptions(sortedData, 'GPName'))
+                    setVillageOptions(getUniqueOptions(sortedData, 'village'))
+                    setrowGP(getUniqueOptions(sortedData, 'GPName'))
+                    setrowVillage(getUniqueOptions(sortedData, 'village'))
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error)
+            }
         }
 
-        fetchData(); // Initial fetch on mount
-
-        const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Every 5 mins
-
-        return () => clearInterval(intervalId); // Cleanup on unmount
+        fetchData()
+        const interval = setInterval(fetchData, 5 * 60 * 1000) // Refresh every 5 mins
+        return () => clearInterval(interval)
     }, [])
 
     // Apply all filters
@@ -273,6 +368,8 @@ const OverView = () => {
     }, [rrno])
 
 
+
+    console.log(filterRow, '$$$')
     return (
         <>
             <Breadcrumb>

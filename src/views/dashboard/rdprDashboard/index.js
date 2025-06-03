@@ -15,8 +15,8 @@ const Overview = () => {
 
     return (
         <div>
-            <p style={{ color: '#344563', fontWeight: 'bold', fontSize: '26px' }}>Overview</p>
-            <p style={{ color: '##5e6c84', fontSize: '16px' }}>See insights of RDPR</p>
+            {/* <p style={{ color: '#344563', fontWeight: 'bold', fontSize: '26px' }}>Overview</p>
+            <p style={{ color: '##5e6c84', fontSize: '16px' }}>See insights of RDPR</p> */}
             <Row>
 
                 <Col md='10' >

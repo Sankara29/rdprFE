@@ -25,6 +25,12 @@ const OverView = () => {
   const [districtOptions, setDistrictOptions] = useState([])
   const [talukOptions, setTalukOptions] = useState([])
 
+  const [gpOptions, setGpOptions] = useState([]);
+  const [villageOptions, setVillageOptions] = useState([]);
+
+  const [selectedGP, setSelectedGP] = useState(null);
+  const [selectedVillage, setSelectedVillage] = useState(null);
+
   const [selectedDistrict, setSelectedDistrict] = useState(null)
   const [selectedTaluk, setSelectedTaluk] = useState(null)
   const [nodeIdFilter, setNodeIdFilter] = useState("")
@@ -47,70 +53,20 @@ const OverView = () => {
     }).length;
   };
 
-  // const calculateRecentNodeCount = () => {
-  //   const now = new Date();
-  //   return filterRow.filter(item => {
-  //     const capturedTime = new Date(item.captureddatetime);
-  //     if (isNaN(capturedTime)) {
-  //       return false;
-  //     }
 
-  //     const diffMins = (now - capturedTime) / 1000 / 60;
-  //     return diffMins <= 60;
-  //   }).length;
-  // }
 
   useEffect(() => {
     setRecentNodeCount(calculateRecentNodeCount())
   }, [filterRow]) // Recalculate whenever filterRow changes
 
   const columnDefs = useMemo(() => [
-    { headerName: 'Id', field: 'id', maxWidth: 68 },
-    { headerName: 'Village Name', field: 'village', maxWidth: 300 },
+    // { headerName: 'Id', field: 'id', maxWidth: 68 },
+    { headerName: 'Village Name', field: 'village', maxWidth: 200 },
 
-    // {
-    //   headerName: Node Id ,
-    //   field: 'node_id',
-    //   maxWidth: 400,
-    //   cellRendererFramework: (params) => {
-    //     const dataTime = new Date(params.data.captureddatetime);
-    //     const currentTime = new Date();
-    //     const diffInMinutes = (currentTime - dataTime) / 1000 / 60;
-
-    //     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-    //     const handleNavigate = () => {
-    //       navigate('/dashboard/energymeter/nodeId', {
-    //         state: { node_id: params.data.node_id }
-    //       });
-    //     };
-
-    //     const handleContextMenu = (e) => {
-    //       if (!isMobile) {
-    //         e.preventDefault(); // Prevent browser context menu
-    //         handleNavigate();
-    //       }
-    //     };
-
-    //     return (
-    //       <span
-    //         onClick={handleNavigate}
-    //         onContextMenu={handleContextMenu}
-    //         style={{
-    //           cursor: 'pointer',
-    //           fontWeight: 'bold'
-    //         }}
-    //         title="Click or Right-Click for more info"
-    //       >
-    //         {params.data.node_id} {diffInMinutes <= 120 ? '🟢' : '🔴'}
-    //       </span>
-    //     );
-    //   }
-    // },
     {
       headerName: `Node Id (🟢 ${recentNodeCount})`,
       field: 'node_id',
-      maxWidth: 400,
+      maxWidth: 200,
       cellRendererFramework: (params) => {
         const dataTime = new Date(params.data.captureddatetime);
         const currentTime = new Date();
@@ -153,23 +109,83 @@ const OverView = () => {
 
 
     { headerName: 'Meter No', field: 'meterno', maxWidth: 138 },
-    { headerName: 'GP Name', field: 'GPName', maxWidth: 138 },
+    { headerName: 'GP Name', field: 'GPName', maxWidth: 188 },
     { headerName: 'RR No', field: 'rr_no', maxWidth: 138 },
+    // {
+    //   headerName: 'Last Seen (IP)',
+    //   field: 'captureddatetime',
+    //   maxWidth: 300,
+    //   valueFormatter: (params) => {
+    //     const noCommList = ['3300001', '1416910', '1608783', '1608780'];
+    //     // Assuming meterno is part of data in the row
+    //     const meterno = params.data?.meterno;
+
+    //     if (noCommList.includes(meterno)) {
+    //       return 'Not Communicated';
+    //     }
+    //     return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+    //   }
+    // }
+    // {
+    //   headerName: 'Last Seen (IP)',
+    //   field: 'captureddatetime',
+    //   maxWidth: 180,
+    //   valueGetter: (params) => {
+    //     // Return full timestamp for internal logic
+    //     return params.data?.captureddatetime;
+    //   },
+    //   valueFormatter: (params) => {
+    //     const noCommList = ['3300001', '1416910', '1608783', '1608780'];
+    //     const meterno = params.data?.meterno;
+
+    //     if (noCommList.includes(meterno)) {
+    //       return 'Not Communicated';
+    //     }
+
+    //     return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+    //   },
+    //   filter: 'agDateColumnFilter',
+    //   filterParams: {
+    //     comparator: (filterLocalDateAtMidnight, cellValue) => {
+    //       const cellDate = moment(cellValue, 'YYYY-MM-DD');
+    //       if (!cellDate.isValid()) return -1;
+
+    //       const filterDate = moment(filterLocalDateAtMidnight);
+    //       return cellDate.diff(filterDate, 'days');
+    //     }
+    //   }
+    // }
     {
       headerName: 'Last Seen (IP)',
       field: 'captureddatetime',
-      maxWidth: 300,
+      maxWidth: 180,
+      valueGetter: (params) => {
+        return params.data?.captureddatetime;
+      },
       valueFormatter: (params) => {
         const noCommList = ['3300001', '1416910', '1608783', '1608780'];
-        // Assuming meterno is part of data in the row
         const meterno = params.data?.meterno;
 
         if (noCommList.includes(meterno)) {
           return 'Not Communicated';
         }
-        return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+
+        return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+      },
+      filter: 'agDateColumnFilter',
+      filterParams: {
+        filterOptions: ['equals'], // only allow 'equals' filter
+        suppressAndOrCondition: true, // remove AND/OR logic
+        comparator: (filterLocalDateAtMidnight, cellValue) => {
+          const cellDate = moment(cellValue, 'YYYY-MM-DD');
+          if (!cellDate.isValid()) return -1;
+
+          const filterDate = moment(filterLocalDateAtMidnight);
+          return cellDate.diff(filterDate, 'days');
+        }
       }
     }
+
     ,
     // { headerName: 'Installed At', field: 'created_at', maxWidth: 300 },
     {
@@ -208,9 +224,14 @@ const OverView = () => {
         .then(res => res.json())
         .then(data => {
           if (data.statusCode === 200) {
-            const sortedData = data.data.sort((a, b) =>
-              new Date(b.captureddatetime) - new Date(a.captureddatetime)
-            )
+            const sortedData = data.data
+              .map(item => ({
+                ...item,
+                captureddatetime: item.captureddatetime.split(' ')[0] // Keep only YYYY-MM-DD
+              }))
+              .sort((a, b) =>
+                new Date(b.captureddatetime) - new Date(a.captureddatetime)
+              )
             setRowData(sortedData)
 
             console.log(sortedData, "4")
@@ -221,6 +242,10 @@ const OverView = () => {
 
             setDistrictOptions(getUniqueOptions(data.data, 'district'))
             setTalukOptions(getUniqueOptions(data.data, 'taluk'))
+            const gps = [...new Set(data.data.map(item => item.GPName))].sort();
+            const villages = [...new Set(data.data.map(item => item.village))].sort();
+            setGpOptions(gps.map(item => ({ label: item, value: item })));
+            setVillageOptions(villages.map(item => ({ label: item, value: item })));
           }
         })
     }
@@ -250,21 +275,17 @@ const OverView = () => {
       )
     }
 
+    if (selectedGP) {
+      filtered = filtered.filter(item => item.GPName === selectedGP.value);
+    }
+
+    if (selectedVillage) {
+      filtered = filtered.filter(item => item.village === selectedVillage.value);
+    }
+
     setFilterRow(filtered)
-  }, [selectedDistrict, selectedTaluk, nodeIdFilter, rowData])
-  // const handleRowRightClick = (event) => {
-  //   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  //   if (isMobile) return;
+  }, [selectedDistrict, selectedTaluk, nodeIdFilter, rowData, selectedGP, selectedVillage])
 
-  //   event.event.preventDefault(); // Prevent browser context menu
-
-  //   const nodeId = event.data?.node_id;
-  //   if (nodeId) {
-  //     navigate('/dashboard/energymeter/nodeId', {
-  //       state: { node_id: nodeId }
-  //     });
-  //   }
-  // };
   const handleCellRightClick = (event) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) return;
@@ -282,7 +303,32 @@ const OverView = () => {
       }
     }
   };
+  useEffect(() => {
+    if (selectedGP) {
+      const filteredVillages = rowData
+        .filter(item => item.GPName === selectedGP.value)
+        .map(item => item.village);
 
+      const uniqueVillages = [...new Set(filteredVillages)]
+        .sort()
+        .map(v => ({
+          label: v,
+          value: v
+        }));
+
+      setVillageOptions(uniqueVillages);
+      setSelectedVillage(null); // clear village when GP changes
+    } else {
+      // if GP not selected, show all villages sorted
+      const allVillages = [...new Set(rowData.map(item => item.village))]
+        .sort()
+        .map(v => ({
+          label: v,
+          value: v
+        }));
+      setVillageOptions(allVillages);
+    }
+  }, [selectedGP, rowData]);
 
   return (
     <>
@@ -296,20 +342,9 @@ const OverView = () => {
       <Row style={{ alignItems: 'center', display: 'flex' }}>
         <FilterSelect label="District" options={districtOptions} selected={selectedDistrict} onChange={setSelectedDistrict} control={control} name="district" />
         <FilterSelect label="Taluk" options={talukOptions} selected={selectedTaluk} onChange={setSelectedTaluk} control={control} name="taluk" />
-
-        {/* Node ID Text Filter */}
-        {/* <Col md='3' sm='8'>
-          <div className='mb-1'>
-            <Label className='form-label'>Filter by Node ID</Label>
-            <Input
-              type='text'
-              placeholder='Enter Node ID...'
-              value={nodeIdFilter}
-              onChange={(e) => setNodeIdFilter(e.target.value)}
-            />
-          </div>
-        </Col> */}
-        <Col md='3' sm='8'>
+        <FilterSelect label="GPName" options={gpOptions} selected={selectedGP} onChange={setSelectedGP} control={control} name="GPName" />
+        <FilterSelect label="Village" options={villageOptions} selected={selectedVillage} onChange={setSelectedVillage} control={control} name="Village" />
+        <Col md='2' sm='8'>
           <div className='mb-1'>
             <Label className='form-label'>Search</Label>
             <Input
@@ -326,12 +361,12 @@ const OverView = () => {
 
         {/* Count Display */}
         <Col md='3' sm='8'>
-          <div><h4 style={{ margin: '0px' }}>Total Installed Count - {filterRow.length}</h4></div>
+          <div><h4 style={{ margin: '10px 0px' }}>Total Installed Count - {filterRow.length}</h4></div>
         </Col>
       </Row>
 
       {/* Grid */}
-      <div className="ag-theme-alpine" style={{ height: '674px', width: '86%' }}>
+      <div className="ag-theme-alpine" style={{ height: '674px', width: '90%' }}>
         {filterRow.length > 0 ? (
           <AgGridReact
             ref={gridRef}
@@ -352,7 +387,7 @@ const OverView = () => {
 }
 
 const FilterSelect = ({ label, options, selected, onChange, control, name }) => (
-  <Col md='3' sm='8'>
+  <Col md='2' sm='8'>
     <div className='mb-1'>
       <Label className='form-label'>{`Select ${label}`}</Label>
       <Controller

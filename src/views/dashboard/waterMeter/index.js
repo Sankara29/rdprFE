@@ -138,9 +138,28 @@ const OverView = () => {
       }
     },
     {
-      headerName: 'lastSeen', field: 'last_communicated_datetime', maxWidth: 260, valueFormatter: (params) => {
-        return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+      headerName: 'lastSeen', field: 'last_communicated_datetime', maxWidth: 260, valueGetter: (params) => {
+        // Return full timestamp for internal logic
+        return params.data?.last_communicated_datetime;
+      },
+      valueFormatter: (params) => {
+
+
+        return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+      },
+      filter: 'agDateColumnFilter',
+      filterParams: {
+        filterOptions: ['equals'], // only allow 'equals' filter
+        suppressAndOrCondition: true, // remove AND/OR logic
+        comparator: (filterLocalDateAtMidnight, cellValue) => {
+          const cellDate = moment(cellValue, 'YYYY-MM-DD');
+          if (!cellDate.isValid()) return -1;
+
+          const filterDate = moment(filterLocalDateAtMidnight);
+          return cellDate.diff(filterDate, 'days');
+        }
       }
+
     },
     {
       headerName: 'min_flowrate(m³/h)', field: 'min_flowrate', maxWidth: 179, valueFormatter: params => {
@@ -191,9 +210,17 @@ const OverView = () => {
         .then(res => res.json())
         .then(data => {
           if (data.statusCode === 200) {
-            const sortedData = data.data.sort((a, b) =>
-              new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
-            )
+            // const sortedData = data.data.sort((a, b) =>
+            //   new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
+            // )
+            const sortedData = data.data
+              .map(item => ({
+                ...item,
+                last_communicated_datetime: item.last_communicated_datetime.split(' ')[0] // Keep only YYYY-MM-DD
+              }))
+              .sort((a, b) =>
+                new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
+              )
             setRowData(sortedData);
             setFilterRow(sortedData);
 
