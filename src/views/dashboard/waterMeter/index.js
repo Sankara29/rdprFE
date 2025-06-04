@@ -38,7 +38,7 @@ const OverView = () => {
   const calculateRecentNodeCount = () => {
     const now = new Date();
     return filterRow.filter(item => {
-      const capturedTime = new Date(item.last_communicated_datetime);
+      const capturedTime = new Date(item.latest_data_datetime);
       if (isNaN(capturedTime)) {
         return false;
       }
@@ -78,7 +78,7 @@ const OverView = () => {
       field: 'node_id',
       maxWidth: 180,
       cellRendererFramework: (params) => {
-        const dataTime = new Date(params.data.last_communicated_datetime);
+        const dataTime = new Date(params.data.latest_data_datetime);
         const currentTime = new Date();
 
         const isToday =
@@ -138,9 +138,9 @@ const OverView = () => {
       }
     },
     {
-      headerName: 'lastSeen', field: 'last_communicated_datetime', maxWidth: 260, valueGetter: (params) => {
+      headerName: 'lastSeen', field: 'latest_data_datetime', maxWidth: 260, valueGetter: (params) => {
         // Return full timestamp for internal logic
-        return params.data?.last_communicated_datetime;
+        return params.data?.latest_data_datetime;
       },
       valueFormatter: (params) => {
 
@@ -161,17 +161,21 @@ const OverView = () => {
       }
 
     },
+    // {
+    //   headerName: 'min_flowrate(m³/h)', field: 'min_flowrate', maxWidth: 179, valueFormatter: params => {
+    //     return params.value !== null ? params.value.toFixed(2) : 0;
+    //   }
+    // },
+    // {
+    //   headerName: 'median_flowrate(m³/h)', field: 'median_flowrate', maxWidth: 200, valueFormatter: params => {
+    //     return params.value !== null ? params.value.toFixed(2) : 0;
+    //   }
+    // },
     {
-      headerName: 'min_flowrate(m³/h)', field: 'min_flowrate', maxWidth: 179, valueFormatter: params => {
-        return params.value !== null ? params.value.toFixed(2) : 0;
+      headerName: 'max_flowrate(m³/h)', field: 'max_flowrate', maxWidth: 200, valueFormatter: params => {
+        return params?.value !== null ? params?.value?.toFixed(2) : 0;
       }
     },
-    {
-      headerName: 'median_flowrate(m³/h)', field: 'median_flowrate', maxWidth: 200, valueFormatter: params => {
-        return params.value !== null ? params.value.toFixed(2) : 0;
-      }
-    },
-    { headerName: 'max_flowrate(m³/h)', field: 'max_flowrate', maxWidth: 200 },
     {
       headerName: 'More Info',
       cellRendererFramework: (params) => (
@@ -211,15 +215,15 @@ const OverView = () => {
         .then(data => {
           if (data.statusCode === 200) {
             // const sortedData = data.data.sort((a, b) =>
-            //   new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
+            //   new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
             // )
             const sortedData = data.data
               .map(item => ({
                 ...item,
-                last_communicated_datetime: item.last_communicated_datetime.split(' ')[0] // Keep only YYYY-MM-DD
+                latest_data_datetime: item.latest_data_datetime.split(' ')[0] // Keep only YYYY-MM-DD
               }))
               .sort((a, b) =>
-                new Date(b.last_communicated_datetime) - new Date(a.last_communicated_datetime)
+                new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
               )
             setRowData(sortedData);
             setFilterRow(sortedData);

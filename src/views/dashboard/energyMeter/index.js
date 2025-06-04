@@ -39,6 +39,7 @@ const OverView = () => {
   // Function to calculate the recent node count
   const calculateRecentNodeCount = () => {
     const now = new Date();
+
     return filterRow.filter(item => {
       const capturedTime = new Date(item.captureddatetime);
       if (isNaN(capturedTime)) {
@@ -64,7 +65,7 @@ const OverView = () => {
     { headerName: 'Village Name', field: 'village', maxWidth: 200 },
 
     {
-      headerName: `Node Id (🟢 ${recentNodeCount})`,
+      headerName: `Node Id (🟢 ${recentNodeCount - 1})`,
       field: 'node_id',
       maxWidth: 200,
       cellRendererFramework: (params) => {
