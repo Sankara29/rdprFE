@@ -80,7 +80,22 @@ const OverView = () => {
 
         fetchWaterData();
     }, [node_id, date])
+    const [tankDetails, setTankDetails] = useState([])
+    useEffect(() => {
+        const fetchTankDetails = async () => {
+            if (!node_id) return;
+            try {
+                const res = await fetch(`${API_URL}/getTankNodes?node_id=${node_id}`);
+                if (!res.ok) throw new Error("Failed to fetch data");
+                const data = await res.json();
+                setTankDetails(data.data);
+            } catch (err) {
+                console.log(err)
+            }
 
+        }
+        fetchTankDetails()
+    }, [node_id])
     useEffect(() => {
         if (!date || loadData.length === 0) {
             setFilteredData([]);
@@ -551,7 +566,9 @@ const OverView = () => {
                     <span style={{ fontWeight: 'bold' }}>Population:</span> {population} |
                     <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp} |
                     <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id} |
-                    <span style={{ fontWeight: 'bold' }}>Connection ID:</span>{connectId ?? 0}
+                    <span style={{ fontWeight: 'bold' }}>Connection ID:</span>{connectId ?? 0} |
+                    {tankDetails && <><span style={{ fontWeight: 'bold' }}>Tank Node:</span>{tankDetails?.tank_node ?? 'Null'} |
+                        <span style={{ fontWeight: 'bold' }}>Water Level:</span>{tankDetails?.water_level ?? 'Null'}</>}
                 </h2>
                 <p style={{
                     fontSize: '18px',

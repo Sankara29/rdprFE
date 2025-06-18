@@ -23,6 +23,9 @@ const Overall = lazy(() => import('../../views/dashboard/OverAll'));
 const SingleVillage = lazy(() => import('../../views/dashboard/SingleVillage'));
 const Dateload = lazy(() => import("../../views/dashboard/dailyUseByNodeId/LoadPop"))
 const Installed = lazy(() => import("../../views/dashboard/installedStats"))
+const GetTime = lazy(() => import("../../views/dashboard/GetTime"))
+const GetTankNode = lazy(() => import("../../views/dashboard/tankNode"))
+const Compare = lazy(() => import('../../views/dashboard/comparingReport'))
 const Login = lazy(() => import('../../views/dashboard/login'))
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
@@ -144,6 +147,18 @@ const DashboardRoutes = [
   {
     path: "/dashboard/Overall",
     element: <Overall />,
+  },
+  {
+    path: "/dashboard/getTime",
+    element: <GetTime />,
+  },
+  {
+    path: "/dashboard/tankNode",
+    element: <GetTankNode />,
+  },
+  {
+    path: "/dashboard/comparing",
+    element: <Compare />
   },
   {
     path: "/dashboard/login",

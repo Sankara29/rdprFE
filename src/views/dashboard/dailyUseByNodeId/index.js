@@ -184,7 +184,7 @@ const OverView = () => {
             e.gwid == waterEntry.node_id &&
             moment(e.timeclock).subtract(1, 'day').isSame(waterEntry.date, 'day')
           )
-
+          // console.log(match?.daily_whimp, match?.daily_whimp / 1000, waterEntry)
           return {
             ...waterEntry,
             energy_usage: match?.daily_whimp / 1000 ?? null
@@ -240,8 +240,23 @@ const OverView = () => {
     }
 
     const todays = todayCon.filter((data) => data.node_id == node_id);
+    const todayDateStr = new Date().toISOString().split('T')[0];
 
-    const combined = [{ rr_no: todays?.[0]?.rr_no, node_id: todays?.[0]?.node_id, village: todays?.[0]?.village, GPName: todays?.[0]?.GPName, water_usage: todays?.[0]?.today_water_consumption, energy_usage: todays?.[0]?.today_energy_consumption, date: todays?.[0]?.datetime, pumpHB: filtered?.[1]?.pumpHB }, ...filtered];
+    // Check if `todays[0]` exists and has today's date
+    const isTodayDataValid = todays[0] && todays[0].datetime?.startsWith(todayDateStr);
+
+    const combined = isTodayDataValid
+      ? [{
+        rr_no: todays[0].rr_no,
+        node_id: todays[0].node_id,
+        village: todays[0].village,
+        GPName: todays[0].GPName,
+        water_usage: todays[0].today_water_consumption,
+        energy_usage: todays[0].today_energy_consumption,
+        date: todays[0].datetime,
+        pumpHB: filtered?.[1]?.pumpHB
+      }, ...filtered]
+      : [...filtered];
 
     setFilterRow(combined);
   }, [nodeIdFilter, rowData])

@@ -65,7 +65,7 @@ const OverView = () => {
     { headerName: 'Village Name', field: 'village', maxWidth: 200 },
 
     {
-      headerName: `Node Id (🟢 ${recentNodeCount - 1})`,
+      headerName: `Node Id (🟢 ${recentNodeCount})`,
       field: 'node_id',
       maxWidth: 200,
       cellRendererFramework: (params) => {
@@ -228,7 +228,7 @@ const OverView = () => {
             const sortedData = data.data
               .map(item => ({
                 ...item,
-                captureddatetime: item.captureddatetime.split(' ')[0] // Keep only YYYY-MM-DD
+                captureddatetime: item.captureddatetime?.split(' ')[0] // Keep only YYYY-MM-DD
               }))
               .sort((a, b) =>
                 new Date(b.captureddatetime) - new Date(a.captureddatetime)

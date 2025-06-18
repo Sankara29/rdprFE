@@ -29,12 +29,12 @@ export default [
     icon: <Settings size={12} />,
     navLink: '/dashboard/overall'
   },
-  // {
-  //   id: 'live Data',
-  //   title: 'todays Data',
-  //   icon: <Clock size={12} />,
-  //   navLink: '/dashboard/liveData'
-  // },
+  {
+    id: 'live Data',
+    title: 'yesterday report',
+    icon: <Clock size={12} />,
+    navLink: '/dashboard/dailyUse'
+  },
   {
     id: 'energymeter',
     title: 'Energy Meter',
@@ -48,12 +48,12 @@ export default [
     navLink: '/dashboard/waterMeter'
   },
 
-  // {
-  //   id: 'Daily usage',
-  //   title: 'Daily usage',
-  //   icon: <Target size={12} />,
-  //   navLink: '/dashboard/dailyUse'
-  // },
+  {
+    id: 'tankNode',
+    title: 'Tank Node',
+    icon: <Target size={12} />,
+    navLink: '/dashboard/tankNode'
+  },
   {
     id: 'Report',
     title: 'Billing Report',
@@ -91,5 +91,17 @@ export default [
   //   icon: <Circle size={12} />,
   //   navLink: '/dashboard/villageDataInsights'
   // },
+  {
+    id: 'compare',
+    title: 'Comparing',
+    icon: <Calendar size={12} />,
+    navLink: '/dashboard/comparing'
+  },
+  {
+    id: 'getTime',
+    title: 'getTime Details',
+    icon: <Circle size={12} />,
+    navLink: '/dashboard/gettime'
+  },
 
 ]

@@ -134,6 +134,7 @@ const OverView = () => {
       setColumnDefs(filteredDefs);
     }
   }, [selectedMonth]);
+  const lastRightClickRef = useRef(0)
   const handleCellRightClick = (event) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     if (isMobile) return;
@@ -141,10 +142,14 @@ const OverView = () => {
     event.event.preventDefault(); // Prevent browser context menu
 
     const nodeId = event.data?.gwid;
-    if (nodeId) {
-      navigate('/dashboard/DlReport', {
-        state: { node_id: nodeId }
-      });
+    const delta = now - lastRightClickRef.current
+    lastRightClickRef.current = now
+    if (delta < 400) {
+      if (nodeId) {
+        navigate('/dashboard/DlReport', {
+          state: { node_id: nodeId }
+        });
+      }
     }
   };
 
