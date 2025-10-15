@@ -10,6 +10,8 @@ import "ag-grid-community/styles/ag-grid.css"
 import "ag-grid-community/styles/ag-theme-alpine.css"
 import API_URL from '../../../config'
 import moment from "moment"
+import Loader from "../rdprDashboard/Loader"
+import dayjs from "dayjs"
 
 const OverView = () => {
     const [energyMeter, setEnergyMeter] = useState([])
@@ -132,18 +134,17 @@ const OverView = () => {
             sortable: true,
             cellStyle: params => isOlderThan24Hours(params.value) ? { color: "red" } : {},
             valueFormatter: params => {
-                return params.value ? moment(params.value).format('YYYY-MM-DD HH:MM') : '';
+                return params.value ? dayjs(params.value).format('YYYY-MM-DD HH:mm') : '';
             },
             filter: 'agDateColumnFilter',
             filterParams: {
-                // filterOptions: ['inRange'], // ✅ Allow range selection
                 suppressAndOrCondition: true,
-                browserDatePicker: true, // ✅ Show native date picker
-
+                browserDatePicker: true,
                 comparator: (filterLocalDateAtMidnight, cellValue) => {
                     if (!cellValue) return -1;
-                    const cellDate = moment(cellValue).startOf('day');
-                    const filterDate = moment(filterLocalDateAtMidnight).startOf('day');
+
+                    const cellDate = dayjs(cellValue).startOf('day');
+                    const filterDate = dayjs(filterLocalDateAtMidnight).startOf('day');
 
                     if (!cellDate.isValid() || !filterDate.isValid()) return -1;
                     if (cellDate.isBefore(filterDate)) return -1;
@@ -243,7 +244,9 @@ const OverView = () => {
             </Row>
 
             {loading ? (
-                <Spinner color="primary" />
+                <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+                    <Loader />
+                </div>
             ) : (
                 <div className="ag-theme-alpine" style={{ height: 600, width: "100%" }}>
                     <AgGridReact

@@ -125,7 +125,13 @@ const NodeMap = () => {
 
     const fetchData = async () => {
         try {
-            const locations = await fetch(`https://testhotel2.prysmcable.com/v25/getAllStarterNodes`);
+            const locations = await fetch(`https://testhotel2.prysmcable.com/v35/getAllStarterNodes`, {
+                method: "GET",
+                headers: {
+                    "x-api-key": "uprtvubdxwyuhebwsnkrdirmfoqorkap", // replace with your API key
+                    "Content-Type": "application/json"
+                }
+            });
             const location = await locations.json();
             const feederData = location.data;
             setFeeders(feederData);

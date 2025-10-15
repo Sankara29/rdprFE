@@ -14,7 +14,7 @@ import Moment from "moment";
 import moment from "moment";
 import Loader from "../rdprDashboard/Loader";
 import dayjs from "dayjs";
-const OverView = () => {
+const OverView = ({ node_id }) => {
     const [commanData, setCommanData] = useState(null)
     const [loadData, setLoadData] = useState([]);
     const [eventData, setEventData] = useState([]);
@@ -22,7 +22,7 @@ const OverView = () => {
     const [billData, setBillData] = useState([]);
     const [instData, setInstData] = useState([])
     const location = useLocation();
-    const { node_id } = location.state || {};
+    // const { node_id } = location.state || {};
     // console.log(node_id)
     useEffect(() => {
         fetch(API_URL + `/getMeterInfoDataNodeById?node_id=${node_id}`)
@@ -378,12 +378,12 @@ const OverView = () => {
                     </a>
                 </BreadcrumbItem>
                 <BreadcrumbItem>
-                    <a href="/dashboard/energymeter">
+                    <a href="/dashboard/energymeterhttp">
                         energymeter
                     </a>
                 </BreadcrumbItem>
                 <BreadcrumbItem active>
-                    <a href="/dashboard/energymeter/nodeId">
+                    <a href="/dashboard/energyByNodeIdhttp">
                         nodeId
                     </a>
                 </BreadcrumbItem>

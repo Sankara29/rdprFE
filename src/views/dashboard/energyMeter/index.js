@@ -13,6 +13,9 @@ import { useForm, Controller } from 'react-hook-form'
 import { Info } from 'react-feather'
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment/moment'
+import Loader from '../rdprDashboard/Loader'
+import { format, parse, isValid, differenceInCalendarDays } from 'date-fns';
+import dayjs from 'dayjs'
 
 const OverView = () => {
   const navigate = useNavigate()
@@ -41,7 +44,7 @@ const OverView = () => {
     const now = new Date();
 
     return filterRow.filter(item => {
-      const capturedTime = new Date(item.captureddatetime);
+      const capturedTime = new Date(item.realtimeclock);
       if (isNaN(capturedTime)) {
         return false;
       }
@@ -69,7 +72,7 @@ const OverView = () => {
       field: 'node_id',
       maxWidth: 200,
       cellRendererFramework: (params) => {
-        const dataTime = new Date(params.data.captureddatetime);
+        const dataTime = new Date(params.data.realtimeclock);
         const currentTime = new Date();
 
         const isToday =
@@ -112,81 +115,35 @@ const OverView = () => {
     { headerName: 'Meter No', field: 'meterno', maxWidth: 138 },
     { headerName: 'GP Name', field: 'GPName', maxWidth: 188 },
     { headerName: 'RR No', field: 'rr_no', maxWidth: 138 },
-    // {
-    //   headerName: 'Last Seen (IP)',
-    //   field: 'captureddatetime',
-    //   maxWidth: 300,
-    //   valueFormatter: (params) => {
-    //     const noCommList = ['3300001', '1416910', '1608783', '1608780'];
-    //     // Assuming meterno is part of data in the row
-    //     const meterno = params.data?.meterno;
 
-    //     if (noCommList.includes(meterno)) {
-    //       return 'Not Communicated';
-    //     }
-    //     return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
-    //   }
-    // }
-    // {
-    //   headerName: 'Last Seen (IP)',
-    //   field: 'captureddatetime',
-    //   maxWidth: 180,
-    //   valueGetter: (params) => {
-    //     // Return full timestamp for internal logic
-    //     return params.data?.captureddatetime;
-    //   },
-    //   valueFormatter: (params) => {
-    //     const noCommList = ['3300001', '1416910', '1608783', '1608780'];
-    //     const meterno = params.data?.meterno;
-
-    //     if (noCommList.includes(meterno)) {
-    //       return 'Not Communicated';
-    //     }
-
-    //     return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
-    //   },
-    //   filter: 'agDateColumnFilter',
-    //   filterParams: {
-    //     comparator: (filterLocalDateAtMidnight, cellValue) => {
-    //       const cellDate = moment(cellValue, 'YYYY-MM-DD');
-    //       if (!cellDate.isValid()) return -1;
-
-    //       const filterDate = moment(filterLocalDateAtMidnight);
-    //       return cellDate.diff(filterDate, 'days');
-    //     }
-    //   }
-    // }
     {
       headerName: 'Last Seen (IP)',
-      field: 'captureddatetime',
+      field: 'realtimeclock',
       maxWidth: 180,
-      valueGetter: (params) => {
-        return params.data?.captureddatetime;
-      },
+      valueGetter: (params) => params.data?.realtimeclock,
       valueFormatter: (params) => {
         const noCommList = ['3300001', '1416910', '1608783', '1608780'];
         const meterno = params.data?.meterno;
 
-        if (noCommList.includes(meterno)) {
-          return 'Not Communicated';
-        }
+        if (noCommList.includes(meterno)) return 'Not Communicated';
 
-        return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+        const date = dayjs(params.value, 'YYYY-M-D H:m:s'); // handles "2025-7-21 11:3:00"
+        return date.isValid() ? date.format('MMM-DD-YYYY') : '';
       },
       filter: 'agDateColumnFilter',
       filterParams: {
-        filterOptions: ['equals'], // only allow 'equals' filter
-        suppressAndOrCondition: true, // remove AND/OR logic
+        filterOptions: ['equals'],
+        suppressAndOrCondition: true,
         comparator: (filterLocalDateAtMidnight, cellValue) => {
-          const cellDate = moment(cellValue, 'YYYY-MM-DD');
+          const cellDate = dayjs(cellValue, 'YYYY-M-D H:m:s');
+          const filterDate = dayjs(filterLocalDateAtMidnight);
+
           if (!cellDate.isValid()) return -1;
 
-          const filterDate = moment(filterLocalDateAtMidnight);
-          return cellDate.diff(filterDate, 'days');
+          return cellDate.startOf('day').diff(filterDate.startOf('day'), 'day');
         }
       }
     }
-
     ,
     // { headerName: 'Installed At', field: 'created_at', maxWidth: 300 },
     {
@@ -225,15 +182,32 @@ const OverView = () => {
         .then(res => res.json())
         .then(data => {
           if (data.statusCode === 200) {
+            // const sortedData = data.data
+            //   .map(item => ({
+            //     ...item,
+            //     realtimeclock: item.realtimeclock?.split(' ')[0] // Keep only YYYY-MM-DD
+            //   }))
+            //   .sort((a, b) =>
+            //     new Date(b.realtimeclock) - new Date(a.realtimeclock)
+            //   )
+            // setRowData(sortedData)
+
             const sortedData = data.data
               .map(item => ({
                 ...item,
-                captureddatetime: item.captureddatetime?.split(' ')[0] // Keep only YYYY-MM-DD
+                realtimeclock: item.realtimeclock
               }))
-              .sort((a, b) =>
-                new Date(b.captureddatetime) - new Date(a.captureddatetime)
-              )
-            setRowData(sortedData)
+              .sort((a, b) => {
+                const dateA = dayjs(a.realtimeclock, 'YYYY-M-D H:m:s');
+                const dateB = dayjs(b.realtimeclock, 'YYYY-M-D H:m:s');
+
+                if (!dateA.isValid()) return 1;
+                if (!dateB.isValid()) return -1;
+
+                return dateB.valueOf() - dateA.valueOf(); // descending
+              });
+
+            setRowData(sortedData);
 
             console.log(sortedData, "4")
             setFilterRow(sortedData)
@@ -381,7 +355,7 @@ const OverView = () => {
             onGridReady={onGridReady}
             onCellContextMenu={handleCellRightClick}
           />
-        ) : <p>No Data Found</p>}
+        ) : <Loader />}
       </div>
     </>
   )

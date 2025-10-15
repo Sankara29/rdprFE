@@ -10,6 +10,7 @@ import '/node_modules/ag-grid-community/styles/ag-theme-alpine.css'
 import API_URL from '../../../config';
 import Moment from "moment";
 import moment from "moment";
+import dayjs from "dayjs";
 const OverView = () => {
     // const [commanData, setCommanData] = useState(null)
 
@@ -100,7 +101,7 @@ const OverView = () => {
 
         {
             headerName: 'lastSeen', field: 'datetime', maxWidth: 300, valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+                return params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '';
             }
         },
 

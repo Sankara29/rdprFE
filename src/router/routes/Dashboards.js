@@ -21,12 +21,20 @@ const DashboardReport = lazy(() => import("../../views/dashboard/reportMeter"));
 const DashboardReportNodeId = lazy(() => import("../../views/dashboard/reportDL"));
 const Overall = lazy(() => import('../../views/dashboard/OverAll'));
 const SingleVillage = lazy(() => import('../../views/dashboard/SingleVillage'));
+const DailyInstallationStatus = lazy(() => import('../../views/dashboard/dailyInstallationStatus'));
+const GettimeCount = lazy(() => import('../../views/dashboard/gettimeWithCount'));
 const Dateload = lazy(() => import("../../views/dashboard/dailyUseByNodeId/LoadPop"))
 const Installed = lazy(() => import("../../views/dashboard/installedStats"))
 const GetTime = lazy(() => import("../../views/dashboard/GetTime"))
 const GetTankNode = lazy(() => import("../../views/dashboard/tankNode"))
 const Compare = lazy(() => import('../../views/dashboard/comparingReport'))
 const Login = lazy(() => import('../../views/dashboard/login'))
+const EnergyMeterHttp = lazy(() => import('../../views/dashboard/energyMeterhttp'));
+const EnergyMeterNodeHttp = lazy(() => import('../../views/dashboard/energyMeterNodeIdhttp'));
+const WaterMeterNodeHttp = lazy(() => import('../../views/dashboard/httpwaterMeterNodeId'));
+const GettimeCountField = lazy(() => import('../../views/dashboard/gettimeWithCountField'));
+const Getsession = lazy(() => import('../../views/dashboard/sessionDetails'));
+const Newrrno = lazy(() => import('../../views/dashboard/newRRNO'));
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
 
@@ -116,6 +124,18 @@ const DashboardRoutes = [
     element: <DashboardEnergyMeterNodeIdLive />,
   },
   {
+    path: "/dashboard/energymeterhttp",
+    element: <EnergyMeterHttp />,
+  },
+  {
+    path: "/dashboard/energyByNodeIdhttp",
+    element: <EnergyMeterNodeHttp />,
+  },
+  {
+    path: "/dashboard/waterByNodeIdhttp",
+    element: <WaterMeterNodeHttp />,
+  },
+  {
     path: "/dashboard/Dl/energyByNodeId",
     element: <DashboardEnergyMeterNodeIdBill />,
   },
@@ -168,7 +188,25 @@ const DashboardRoutes = [
     path: "/dashboard/Singlevillage",
     element: <SingleVillage />,
   },
+  {
+    path: "/dashboard/dailyInstallationStatus",
+    element: <DailyInstallationStatus />,
+  },
 
+  {
+    path: "/dashboard/gettimeWithCount",
+    element: <GettimeCount />,
+  },
+  {
+    path: "/dashboard/gettimeWithCountField",
+    element: <GettimeCountField />,
+  }, {
+    path: "/dashboard/session",
+    element: <Getsession />,
+  }, {
+    path: "/dashboard/newRRNO",
+    element: <Newrrno />,
+  },
 ];
 
 export default DashboardRoutes;

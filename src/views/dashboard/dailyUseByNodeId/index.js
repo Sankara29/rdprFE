@@ -13,6 +13,8 @@ import { Info } from 'react-feather'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import moment from 'moment'
 import LoadPop from './LoadPop'
+import Loader from '../rdprDashboard/Loader'
+import dayjs from 'dayjs'
 
 const OverView = () => {
   const navigate = useNavigate()
@@ -42,7 +44,7 @@ const OverView = () => {
     { headerName: 'Gram panchayat', field: 'GPName', maxWidth: 128 },
     {
       headerName: 'date', field: 'date', maxWidth: 100, valueFormatter: (params) => {
-        return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+        return params.value ? dayjs(params.value).format('MMM-DD-YYYY') : '';
       }
     },
     {
@@ -114,7 +116,7 @@ const OverView = () => {
       valueFormatter: (params) => {
         const year = params.data?.YearOfBill;
         const month = params.data?.MonthId;
-        return year && month ? moment(`${year}-${month}-01`).format('MMM-YYYY') : '';
+        return year && month ? dayjs(`${year}-${month}-01`).format('MMM-YYYY') : '';
       }
     },
     {
@@ -167,7 +169,7 @@ const OverView = () => {
 
       const [waterRes, energyRes, todayRes] = await Promise.all([
         fetch(API_URL + `/getDailyWaterUsage?nodeId=${node_id}`),
-        fetch("https://testpms.ms-tech.in/v15/getDlReport"),
+        fetch(`https://testpms.ms-tech.in/v15/getDlReport?node_id=${node_id}`),
         fetch("https://testpms.ms-tech.in/v15/getLiveDataTemp")
       ])
 
@@ -182,7 +184,7 @@ const OverView = () => {
         const mergedData = waterData.data.map(waterEntry => {
           const match = energyData.data.find(e =>
             e.gwid == waterEntry.node_id &&
-            moment(e.timeclock).subtract(1, 'day').isSame(waterEntry.date, 'day')
+            dayjs(e.timeclock).subtract(1, 'day').isSame(waterEntry.date, 'day')
           )
           // console.log(match?.daily_whimp, match?.daily_whimp / 1000, waterEntry)
           return {
@@ -194,7 +196,7 @@ const OverView = () => {
 
 
         setRowData(mergedData)
-        setFilteredData(mergedData)
+        // setFilteredData(mergedData)
       }
     }
 
@@ -207,7 +209,7 @@ const OverView = () => {
 
   useEffect(() => {
     const fetchConnection = async () => {
-      const res = await fetch(API_URL + "/getrrNoAndConnectionMapp");
+      const res = await fetch(API_URL + `/getrrNoAndConnectionMapp?rrNo=${rr_no}`);
       const data = await res.json();
       const currentConnectionId = data.data.filter((data) => data.rr_no == rr_no);
       setConnectionId(currentConnectionId?.[0]?.con_id)
@@ -344,8 +346,8 @@ const OverView = () => {
           />
         </div>
       ) : (
-        <div className="ag-theme-alpine" style={{ height: '674px', width: '70%' }}>
-          <p>No Data Found</p>
+        <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+          <Loader />
         </div>
       )}
 

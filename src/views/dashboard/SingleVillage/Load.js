@@ -5,6 +5,7 @@ import '/node_modules/ag-grid-community/styles/ag-grid.css'
 import '/node_modules/ag-grid-community/styles/ag-theme-alpine.css'
 import moment from "moment";
 import { Card, CardHeader } from "reactstrap";
+import dayjs from "dayjs";
 
 
 const Load = ({ node_id }) => {
@@ -43,7 +44,7 @@ const Load = ({ node_id }) => {
             field: 'captureddatetime',
             maxWidth: 150
             , valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+                return params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '';
             }
         },
         {
@@ -52,7 +53,7 @@ const Load = ({ node_id }) => {
             maxWidth: 150,
             valueFormatter: (params) =>
                 params.data.blockdatetime
-                    ? moment(params.data.blockdatetime).format('MMM-DD-YYYY HH:mm')  // Format date and time
+                    ? dayjs(params.data.blockdatetime).format('MMM-DD-YYYY HH:mm')  // Format date and time
                     : 'N/A'  // Fallback in case of missing value
         },
         {

@@ -17,6 +17,8 @@ import { Info } from 'react-feather'
 import moment from 'moment'
 import API_URL from '../../../config'
 import Select from 'react-select'
+import Loader from '../rdprDashboard/Loader'
+import dayjs from 'dayjs'
 
 const OverView = () => {
   const navigate = useNavigate()
@@ -61,7 +63,7 @@ const OverView = () => {
       field: 'date',
       maxWidth: 110,
       valueFormatter: params =>
-        params.value ? moment(params.value).format('MMM-DD-YYYY') : ''
+        params.value ? dayjs(params.value).format('MMM-DD-YYYY') : ''
     },
     {
       headerName: 'Water Usage (m³)',
@@ -173,11 +175,14 @@ const OverView = () => {
         const mergedData = waterData.data.map(waterEntry => {
 
 
+          // const match = energyData.data.find(e =>
+          //   e.gwid == waterEntry.node_id &&
+          //   moment(e.timeclock).subtract(1, 'day').isSame(waterEntry.date, 'day')
+          // )
           const match = energyData.data.find(e =>
-            e.gwid == waterEntry.node_id &&
-            moment(e.timeclock).subtract(1, 'day').isSame(waterEntry.date, 'day')
-          )
-
+            e.gwid === waterEntry.node_id &&
+            dayjs(e.timeclock).subtract(1, 'day').isSame(dayjs(waterEntry.date), 'day')
+          );
           return {
             ...waterEntry,
             energy_usage: match?.daily_whimp / 1000 ?? null
@@ -355,7 +360,9 @@ const OverView = () => {
             onCellClicked={handleCellClick}
           />
         ) : (
-          <p>No Data Found</p>
+          <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+            <Loader />
+          </div>
         )}
       </div>
     </>

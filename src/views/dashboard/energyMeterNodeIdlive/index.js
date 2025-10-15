@@ -10,6 +10,7 @@ import '/node_modules/ag-grid-community/styles/ag-theme-alpine.css'
 import API_URL from '../../../config';
 import Moment from "moment";
 import moment from "moment";
+import dayjs from "dayjs";
 const OverView = () => {
     const [commanData, setCommanData] = useState(null)
     const [loadData, setLoadData] = useState([]);
@@ -67,19 +68,14 @@ const OverView = () => {
         {
             headerName: 'Capture Date',
             field: 'captureddatetime',
-            maxWidth: 250
-            , valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
-            }
+            maxWidth: 250,
+            valueFormatter: (params) => (params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '')
         },
         {
             headerName: 'Billing Date',
             field: 'billingdate',
             maxWidth: 150,
-            valueFormatter: (params) =>
-                params.data.billingdate
-                    ? Moment(params.data.billingdate).format('MMM-DD-YYYY')  // Format date and time
-                    : 'N/A'  // Fallback in case of missing value
+            valueFormatter: (params) => (params.data.billingdate ? dayjs(params.data.billingdate).format('MMM-DD-YYYY') : 'N/A')
         },
         {
             headerName: 'Vavgᵣ', field: 'Rvoltage', maxWidth: 120, valueFormatter: (params) => {
@@ -134,19 +130,14 @@ const OverView = () => {
         {
             headerName: 'Capture Date',
             field: 'captureddatetime',
-            maxWidth: 250
-            , valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
-            }
+            maxWidth: 250,
+            valueFormatter: (params) => (params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '')
         },
         {
             headerName: 'Block Date',
             field: 'blockdatetime',
             maxWidth: 150,
-            valueFormatter: (params) =>
-                params.data.blockdatetime
-                    ? Moment(params.data.blockdatetime).format('MMM-DD-YYYY')  // Format date and time
-                    : 'N/A'  // Fallback in case of missing value
+            valueFormatter: (params) => (params.data.blockdatetime ? dayjs(params.data.blockdatetime).format('MMM-DD-YYYY HH:mm') : 'N/A')
         },
         {
             headerName: 'Vavgᵣ', // proper Unicode subscript r
@@ -206,18 +197,13 @@ const OverView = () => {
             headerName: 'Time_Of_Entery',
             field: 'timeofentry',
             maxWidth: 250,
-            valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
-            }
+            valueFormatter: (params) => (params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '')
         },
         {
             headerName: 'Event Time',
             field: 'eventtime',
             maxWidth: 150,
-            valueFormatter: (params) =>
-                params.data.eventtime
-                    ? Moment(params.data.eventtime).format('MMM-DD-YYYY')  // Format date and time
-                    : 'N/A'  // Fallback in case of missing value
+            valueFormatter: (params) => (params.data.eventtime ? dayjs(params.data.eventtime).format('MMM-DD-YYYY') : 'N/A')
         },
         { headerName: 'eventtype', field: 'eventtype', maxWidth: 135 },
         { headerName: 'eventID', field: 'eventID', maxWidth: 135 },
@@ -278,18 +264,13 @@ const OverView = () => {
             headerName: 'Capture Date',
             field: 'captureddatetime',
             maxWidth: 250,
-            valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
-            }
+            valueFormatter: (params) => (params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '')
         },
         {
             headerName: 'Billing Date',
             field: 'billingdate',
             maxWidth: 150,
-            valueFormatter: (params) =>
-                params.data.billingdate
-                    ? Moment(params.data.billingdate).format('MMM-DD-YYYY')  // Format date and time
-                    : 'N/A'  // Fallback in case of missing value
+            valueFormatter: (params) => (params.data.billingdate ? dayjs(params.data.billingdate).format('MMM-DD-YYYY') : 'N/A')
         },
 
         // {
@@ -299,7 +280,7 @@ const OverView = () => {
         // },
         {
             headerName: 'Kwh', field: 'cumKwhImp', maxWidth: 180, valueFormatter: (params) => {
-                return params.value ? new Intl.NumberFormat('en-US').format(Number(params.value)?.toFixed(2)) : '';
+                return params.value ? new Intl.NumberFormat('en-US').format((Number(params.value) / 1000)?.toFixed(2)) : '';
             }
         },
         // {
@@ -330,36 +311,19 @@ const OverView = () => {
             }
         },
     ], []);
-    //daily
-    // {
-    //     "id": 1959,
-    //     "gwid": "NSGW800001",
-    //     "meterno": "1416910",
-    //     "meterphase": "3",
-    //     "timeclock": "2024-7-23 0:0:00",
-    //     "cumwhimp": "367017.0000",
-    //     "cumvahimp": "367101.0000",
-    //     "cumwhexp": "0.0000",
-    //     "cumvahexp": "0.0000",
-    //     "captureddatetime": "2024-10-24 12:10:02"
-    // },
+
     const columnDefsDaily = useMemo(() => [
         {
             headerName: 'Capture Date',
             field: 'captureddatetime',
             maxWidth: 250,
-            valueFormatter: (params) => {
-                return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
-            }
+            valueFormatter: (params) => (params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '')
         },
         {
             headerName: 'Time clock',
             field: 'timeclock',
             maxWidth: 150,
-            valueFormatter: (params) =>
-                params.data.timeclock
-                    ? Moment(params.data.timeclock).format('MMM-DD-YYYY')  // Format date and time
-                    : 'N/A'  // Fallback in case of missing value
+            valueFormatter: (params) => (params.data.timeclock ? dayjs(params.data.timeclock).subtract(1, 'day').format('MMM-DD-YYYY') : 'N/A')
         },
 
         {

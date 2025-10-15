@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Row, Col, Breadcrumb, BreadcrumbItem, Input } from 'reactstrap';
 import API_URL from '../../../config';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../rdprDashboard/Loader';
 
 const OverView = () => {
   const gridRef = useRef();
@@ -212,7 +213,9 @@ const OverView = () => {
             onCellContextMenu={handleCellRightClick}
           />
         ) : (
-          <p>Loading data...</p>
+          <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+            <Loader />
+          </div>
         )}
       </div>
     </>

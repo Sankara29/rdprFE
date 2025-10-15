@@ -12,6 +12,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { Info } from 'react-feather'
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment'
+import dayjs from 'dayjs'
 
 const OverView = () => {
   const navigate = useNavigate()
@@ -76,7 +77,7 @@ const OverView = () => {
     // { headerName: 'Flowrate(m³/h)', field: 'flowrate', maxWidth: 148 },
     {
       headerName: 'Last Seen', field: 'datetime', maxWidth: 220, valueFormatter: (params) => {
-        return params.value ? moment(params.value).format('MMM-DD-YYYY HH:mm') : '';
+        return params.value ? dayjs(params.value).format('MMM-DD-YYYY HH:mm') : '';
       }
     },
     {

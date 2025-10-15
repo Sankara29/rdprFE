@@ -133,7 +133,7 @@ const OverView = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (email === 'operator1' && password === '123admin@987') {
-            navigate('/dashboard/rdprDashboard')
+            navigate('/dashboard/energymeterhttp')
             sessionStorage.setItem('auth', 'ok');
 
         }
@@ -146,7 +146,7 @@ const OverView = () => {
 
         // If there's no auth and the current URL is not 'https://rdpr.vercel.app/'
         if (auth) {
-            navigate('/dashboard/rdprDashboard');
+            navigate('/dashboard/energymeterhttp');
         }
 
     }, []);

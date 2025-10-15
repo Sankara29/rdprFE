@@ -6,7 +6,12 @@ import { AgGridReact } from 'ag-grid-react'
 import '/node_modules/ag-grid-community/styles/ag-grid.css'
 import '/node_modules/ag-grid-community/styles/ag-theme-alpine.css'
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Row, Col, Label, Button, Breadcrumb, BreadcrumbItem, Input, Card } from 'reactstrap'
+import {
+  Row, Col, Label, Accordion,
+  AccordionItem,
+  AccordionHeader,
+  AccordionBody, Input, Card
+} from 'reactstrap'
 import Select from 'react-select'
 import classnames from 'classnames'
 import API_URL from '../../../config'
@@ -21,6 +26,8 @@ import { Modal, ModalHeader, ModalBody, Table } from 'reactstrap'
 import React, { useContext } from 'react';
 import { ShepherdTour, ShepherdTourContext } from 'react-shepherd';
 import 'shepherd.js/dist/css/shepherd.css';
+import Loader from './Loader'
+import dayjs from 'dayjs'
 
 
 const TotalSupplyConsumption = () => {
@@ -50,6 +57,36 @@ const TotalSupplyConsumption = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedTalukName, setSelectedTalukName] = useState(null)
   const [talukMonthwiseData, setTalukMonthwiseData] = useState([])
+  // Fetch data
+  useEffect(() => {
+    // const controller = new AbortController()
+    const fetchData = () => {
+      fetch(API_URL + "/getLiveDataTemp")
+        .then(res => res.json())
+        .then(data => {
+          if (data.statusCode === 200) {
+            setRowData(data.data);
+            setFilterRow(data.data);
+
+            const taluks = [...new Set(data.data.map(item => item.taluk))].sort();
+            const gps = [...new Set(data.data.map(item => item.GPName))].sort();
+            const villages = [...new Set(data.data.map(item => item.village))].sort();
+
+            setTaluk(taluks.map(item => ({ label: item, value: item })));
+            setGpOptions(gps.map(item => ({ label: item, value: item })));
+            setVillageOptions(villages.map(item => ({ label: item, value: item })));
+
+          }
+        });
+    };
+
+    // fetchData();
+    navigate("/dashboard/energymeterhttp")
+
+    // const intervalId = setInterval(fetchData, 5 * 60 * 1000);
+
+    // return () => { controller.abort(); clearInterval(intervalId) };
+  }, []);
 
   const handleTalukCardClick = async (talukName) => {
     try {
@@ -79,9 +116,9 @@ const TotalSupplyConsumption = () => {
     },
 
     {
-      headerName: 'Water-today(m³)', field: 'today_water_consumption', maxWidth: 259, sort: 'desc',
+      headerName: 'Water-today(m³)', field: 'today_water_usage', maxWidth: 259, sort: 'desc',
       sortIndex: 0, valueGetter: (params) => {
-        const value = params.data.today_water_consumption;
+        const value = params.data.today_water_usage;
         if (value === undefined || value === null) return null;
         return Number(value) / 1000; // return number for sorting
       },
@@ -91,8 +128,8 @@ const TotalSupplyConsumption = () => {
       }
     },
     {
-      headerName: 'Energy-today(Kwh)', field: 'today_energy_consumption', maxWidth: 248, valueGetter: (params) => {
-        const value = params.data.today_energy_consumption;
+      headerName: 'Energy-today(Kwh)', field: 'today_energy_usage', maxWidth: 248, valueGetter: (params) => {
+        const value = params.data.today_energy_usage / 1000;
         if (value === undefined || value === null || value === 'Null') return null;
 
         const formatted = Number(value).toFixed(2);
@@ -110,8 +147,8 @@ const TotalSupplyConsumption = () => {
       }
     },
     {
-      headerName: 'Last Seen', field: 'datetime', maxWidth: 220, valueFormatter: (params) => {
-        return params.value ? moment(params.value).format('MMM-DD HH:mm') : '';
+      headerName: 'Last Seen', field: 'latest_datetime', maxWidth: 220, valueFormatter: (params) => {
+        return params.value ? dayjs(params.value).format('MMM-DD HH:mm') : '';
       }
     },
 
@@ -135,36 +172,9 @@ const TotalSupplyConsumption = () => {
     gridRef.current = params.api
   }
 
-  // Fetch data
-  useEffect(() => {
-    const fetchData = () => {
-      fetch(API_URL + "/getLiveDataTemp")
-        .then(res => res.json())
-        .then(data => {
-          if (data.statusCode === 200) {
-            setRowData(data.data);
-            setFilterRow(data.data);
-
-            const taluks = [...new Set(data.data.map(item => item.taluk))].sort();
-            const gps = [...new Set(data.data.map(item => item.GPName))].sort();
-            const villages = [...new Set(data.data.map(item => item.village))].sort();
-
-            setTaluk(taluks.map(item => ({ label: item, value: item })));
-            setGpOptions(gps.map(item => ({ label: item, value: item })));
-            setVillageOptions(villages.map(item => ({ label: item, value: item })));
-
-          }
-        });
-    };
-
-    fetchData();
-
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   useEffect(() => {
+    // const controller = new AbortController()
     const fetchData = () => {
       fetch("https://testpms.ms-tech.in/v15/getDashBoardData")
         .then(res => res.json())
@@ -177,14 +187,15 @@ const TotalSupplyConsumption = () => {
           console.error("Failed to fetch dashboard data:", err)
         })
     };
-    fetchData();
+    // fetchData();
 
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000);
+    // const intervalId = setInterval(fetchData, 5 * 60 * 1000);
 
-    return () => clearInterval(intervalId);
+    // return () => { controller.abort(); clearInterval(intervalId); }
   }, [])
 
   useEffect(() => {
+    const controller = new AbortController()
     const fetchTalukWiseBilling = async () => {
       try {
         const res = await fetch("https://testpms.ms-tech.in/v15/getTalukWiseBilling");
@@ -217,7 +228,8 @@ const TotalSupplyConsumption = () => {
       }
     };
 
-    fetchTalukWiseBilling();
+    // fetchTalukWiseBilling();
+    return () => { controller.abort(); }
   }, []);
 
 
@@ -315,7 +327,9 @@ const TotalSupplyConsumption = () => {
   const [todayCommCount, setTodayCommCount] = useState(0)
 
   useEffect(() => {
+    // const controller = new AbortController()
     const fetchData = () => {
+
       fetch(API_URL + '/getInstalledNode')
         .then(res => res.json())
         .then(data => {
@@ -324,7 +338,7 @@ const TotalSupplyConsumption = () => {
               // .filter(item => new Date(item.created_at) > new Date('2025-05-01T00:00:00'))
               .map(item => ({
                 ...item,
-                captureddatetime: item.captureddatetime?.split(' ')[0] // Keep only YYYY-MM-DD
+                captureddatetime: item.realtimeclock?.split(' ')[0] // Keep only YYYY-MM-DD
               }))
               .sort((a, b) =>
                 new Date(b.captureddatetime) - new Date(a.captureddatetime)
@@ -334,47 +348,149 @@ const TotalSupplyConsumption = () => {
         })
     }
 
-    fetchData()
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000)
-    return () => clearInterval(intervalId)
+
+
+    // fetchData()
+    // const intervalId = setInterval(fetchData, 5 * 60 * 1000)
+    // return () => { controller.abort(); clearInterval(intervalId); }
   }, [])
 
 
-  useEffect(() => {
-    const fetchCommStatus = async () => {
-      let count = 0
-      const today = moment().format('MM/DD/YY') // Format as per API response
 
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const fetchCommStatus = async () => {
+      let count = 0;
+      const today = dayjs().format("MM/DD/YY");
+      const cached = sessionStorage.getItem("commStatus");
+
+      // If already fetched for today, use cached value
+      if (cached) {
+        const { date, value } = JSON.parse(cached);
+        if (date === today) {
+          setTodayCommCount(value);
+          return;
+        }
+      }
+
+      // Else fetch fresh
       const requests = energyMeter.map(async (item) => {
-        const nodeId = item.node_id?.trim()
-        if (!nodeId) return
+        const nodeId = item.node_id?.trim();
+        if (!nodeId) return;
 
         try {
-          // https://api.ms-tech.in/v12/getnodestatus?gwid=NSRT000579
-          const res = await fetch(`https://testpms.ms-tech.in/v15/gwid-status/${nodeId}`)
-          const text = await res.json()
+          const res = await fetch(`https://testpms.ms-tech.in/v15/gwid-status/${nodeId}`);
+          const text = await res.json();
 
-          const match = text?.timestamp_str
+          const match = text?.timestamp_str;
           if (match) {
-
-            const commDate = match?.split(' ')[0]
+            const commDate = match.split(" ")[0];
             if (commDate === today) {
-              count++
+              count++;
             }
           }
         } catch (err) {
-          console.error(`Error for node ${nodeId}`, err)
+          console.error(`Error for node ${nodeId}`, err);
         }
-      })
+      });
 
-      await Promise.all(requests)
-      setTodayCommCount(count)
-    }
+      await Promise.all(requests);
+      setTodayCommCount(count);
+      // Store result in sessionStorage
+      sessionStorage.setItem(
+        "commStatus",
+        JSON.stringify({ date: today, value: count })
+      );
+    };
 
     if (energyMeter.length > 0) {
-      fetchCommStatus()
+      // fetchCommStatus();
+
     }
-  }, [energyMeter])
+    return () => { controller.abort() }
+  }, [energyMeter]);
+
+
+
+
+  const [waterCount, setWaterCount] = useState(null)
+  // useEffect(() => {
+  //   const fetchEnergyMeter = async () => {
+  //     const res = await fetch('https://testhotel2.prysmcable.com/v35/getAllWaterMeter')
+  //     const data = await res.json()
+  //     setWaterCount(data.data?.length)
+  //   }
+  //   fetchEnergyMeter()
+
+  // }, [])
+  useEffect(() => {
+    const controller = new AbortController()
+    const fetchData = async () => {
+      try {
+        const [liveRes, meterRes] = await Promise.all([
+          fetch("https://testpms.ms-tech.in/v15/getLiveWaterData").then(res => res.json()),
+          fetch("https://testhotel2.prysmcable.com/v35/getAllWaterMeter", {
+            method: "GET",
+            headers: {
+              "x-api-key": "uprtvubdxwyuhebwsnkrdirmfoqorkap", // replace with your API key
+              "Content-Type": "application/json"
+            }
+          }).then(res => res.json())
+        ]);
+
+        if (liveRes.statusCode === 200 && meterRes.statusCode === 200) {
+          const liveData = liveRes.data;
+          const meterData = meterRes.data;
+
+          // Create a map for fast lookup by rr_no
+          const liveMap = new Map(liveData.map(item => [item.rr_no, item]));
+
+          // List of unmatched meters
+          const unmatched = [];
+
+          meterData.forEach(meter => {
+            const matched = liveMap.get(meter.rr_no);
+            if (!matched) {
+              unmatched.push({
+                node_id: meter.meter_no, // Use meter_no as node_id
+                flowrate: null,
+                live_water_data: null,
+                latest_data_datetime: null,
+                max_flowrate: null,
+                median_flowrate: null,
+                village: meter.village,
+                taluk: meter.taluk,
+                district: meter.district,
+                GPName: meter.GPName,
+                rr_no: meter.rr_no
+              });
+            }
+          });
+
+          // Format date to YYYY-MM-DD for consistency
+          const formattedLiveData = liveData.map(item => ({
+            ...item,
+            latest_data_datetime: item.latest_data_datetime?.split(' ')[0]
+          }));
+
+          const mergedData = [...formattedLiveData, ...unmatched];
+
+          setWaterCount(mergedData?.length)
+
+
+
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    // fetchData();
+
+    // const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Refresh every 5 mins
+    // return () => { controller.abort(); clearInterval(intervalId) }; // Cleanup
+  }, []);
 
   const cardItems = [
     {
@@ -397,7 +513,7 @@ const TotalSupplyConsumption = () => {
     },
     {
       label: 'Water Meters Installed',
-      value: dashboardSummary?.water_meter_installed,
+      value: waterCount,
       color: '#f5a623',
       icon: <FaTint />,
     },
@@ -679,8 +795,9 @@ const TotalSupplyConsumption = () => {
               />
             </div>
           ) : (
-            <div className="ag-theme-alpine" style={{ height: '674px', width: '70%' }}>
-              <p>No Data Found</p>
+            <div className="ag-theme-alpine" style={{ height: '674px', width: '100%' }}>
+              {/* <p>No Data Found</p> */}
+              <Loader />
             </div>
           )}
         </Card>

@@ -19,6 +19,8 @@ import { Info } from 'react-feather';
 import { useNavigate } from 'react-router-dom'
 import { data } from 'jquery';
 import moment from 'moment';
+import Loader from '../rdprDashboard/Loader';
+import dayjs from 'dayjs';
 
 const OverView = () => {
   const navigate = useNavigate();
@@ -71,7 +73,6 @@ const OverView = () => {
     setRecentNodeCount(calculateRecentNodeCount())
   }, [filterRow])
   const columnDefs = useMemo(() => [
-    // { headerName: 'Id', field: 'id', maxWidth: 78 },
     { headerName: 'Village Name', field: 'village', maxWidth: 150 },
     {
       headerName: `Node Id (🟢 ${recentNodeCount})`,
@@ -120,18 +121,6 @@ const OverView = () => {
         return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(params.value);
       }
     },
-    // {
-    //   headerName: 'today consumption(m³)',
-    //   field: 'water_consumption_change',
-    //   maxWidth: 220,
-    //   valueGetter: params => {
-    //     const value = params.data.water_consumption_change;
-    //     return value !== undefined && value !== null ? (Number(value) / 1000) : null;
-    //   },
-    //   valueFormatter: params => {
-    //     return params.value !== null ? params.value.toFixed(2) : '';
-    //   }
-    // },
     {
       headerName: 'flow rate(m³/h)', field: 'flowrate', maxWidth: 150, valueFormatter: params => {
         return params.value !== null ? params.value.toFixed(2) : 0;
@@ -145,32 +134,22 @@ const OverView = () => {
       valueFormatter: (params) => {
 
 
-        return params.value ? moment(params.value).format('MMM-DD-YYYY') : '';
+        return params.value ? dayjs(params.value).format('MMM-DD-YYYY') : '';
       },
       filter: 'agDateColumnFilter',
       filterParams: {
         filterOptions: ['equals'], // only allow 'equals' filter
         suppressAndOrCondition: true, // remove AND/OR logic
         comparator: (filterLocalDateAtMidnight, cellValue) => {
-          const cellDate = moment(cellValue, 'YYYY-MM-DD');
+          const cellDate = dayjs(cellValue, 'YYYY-MM-DD');
           if (!cellDate.isValid()) return -1;
 
-          const filterDate = moment(filterLocalDateAtMidnight);
+          const filterDate = dayjs(filterLocalDateAtMidnight);
           return cellDate.diff(filterDate, 'days');
         }
       }
 
     },
-    // {
-    //   headerName: 'min_flowrate(m³/h)', field: 'min_flowrate', maxWidth: 179, valueFormatter: params => {
-    //     return params.value !== null ? params.value.toFixed(2) : 0;
-    //   }
-    // },
-    // {
-    //   headerName: 'median_flowrate(m³/h)', field: 'median_flowrate', maxWidth: 200, valueFormatter: params => {
-    //     return params.value !== null ? params.value.toFixed(2) : 0;
-    //   }
-    // },
     {
       headerName: 'max_flowrate(m³/h)', field: 'max_flowrate', maxWidth: 200, valueFormatter: params => {
         return params?.value !== null ? params?.value?.toFixed(2) : 0;
@@ -208,42 +187,121 @@ const OverView = () => {
   };
 
   // Main API Fetch
+  // useEffect(() => {
+  //   const fetchData = () => {
+  //     fetch(API_URL + "/getLiveWaterData")
+  //       .then(res => res.json())
+  //       .then(data => {
+  //         if (data.statusCode === 200) {
+  //           // const sortedData = data.data.sort((a, b) =>
+  //           //   new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
+  //           // )
+  //           const sortedData = data.data
+  //             .map(item => ({
+  //               ...item,
+  //               latest_data_datetime: item.latest_data_datetime.split(' ')[0] // Keep only YYYY-MM-DD
+  //             }))
+  //             .sort((a, b) =>
+  //               new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
+  //             )
+  //           setRowData(sortedData);
+  //           setFilterRow(sortedData);
+
+  //           const districts = [...new Set(sortedData.map(item => item.district))]
+  //             .map(d => ({ label: d, value: d }));
+  //           const taluks = [...new Set(sortedData.map(item => item.taluk))]
+  //             .map(t => ({ label: t, value: t }));
+
+  //           setDistrict(districts);
+  //           setTaluk(taluks);
+  //         }
+  //       });
+  //   };
+
+  //   fetchData(); // Initial fetch on mount
+
+  //   const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Every 5 mins
+
+  //   return () => clearInterval(intervalId); // Cleanup on unmount
+  // }, []);
   useEffect(() => {
-    const fetchData = () => {
-      fetch(API_URL + "/getLiveWaterData")
-        .then(res => res.json())
-        .then(data => {
-          if (data.statusCode === 200) {
-            // const sortedData = data.data.sort((a, b) =>
-            //   new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
-            // )
-            const sortedData = data.data
-              .map(item => ({
-                ...item,
-                latest_data_datetime: item.latest_data_datetime.split(' ')[0] // Keep only YYYY-MM-DD
-              }))
-              .sort((a, b) =>
-                new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime)
-              )
-            setRowData(sortedData);
-            setFilterRow(sortedData);
+    const fetchData = async () => {
+      try {
+        const [liveRes, meterRes] = await Promise.all([
+          fetch("https://testpms.ms-tech.in/v15/getLiveWaterData").then(res => res.json()),
+          fetch("https://testhotel2.prysmcable.com/v35/getAllWaterMeter", {
+            method: "GET",
+            headers: {
+              "x-api-key": "uprtvubdxwyuhebwsnkrdirmfoqorkap", // replace with your API key
+              "Content-Type": "application/json"
+            }
+          }).then(res => res.json())
+        ]);
 
-            const districts = [...new Set(sortedData.map(item => item.district))]
-              .map(d => ({ label: d, value: d }));
-            const taluks = [...new Set(sortedData.map(item => item.taluk))]
-              .map(t => ({ label: t, value: t }));
+        if (liveRes.statusCode === 200 && meterRes.statusCode === 200) {
+          const liveData = liveRes.data;
+          const meterData = meterRes.data;
 
-            setDistrict(districts);
-            setTaluk(taluks);
-          }
-        });
+          // Create a map for fast lookup by rr_no
+          const liveMap = new Map(liveData.map(item => [item.rr_no, item]));
+
+          // List of unmatched meters
+          const unmatched = [];
+
+          meterData.forEach(meter => {
+            const matched = liveMap.get(meter.rr_no);
+            if (!matched) {
+              unmatched.push({
+                node_id: meter.meter_no, // Use meter_no as node_id
+                flowrate: null,
+                live_water_data: null,
+                latest_data_datetime: null,
+                max_flowrate: null,
+                median_flowrate: null,
+                village: meter.village,
+                taluk: meter.taluk,
+                district: meter.district,
+                GPName: meter.GPName,
+                rr_no: meter.rr_no
+              });
+            }
+          });
+
+          // Format date to YYYY-MM-DD for consistency
+          const formattedLiveData = liveData.map(item => ({
+            ...item,
+            latest_data_datetime: item.latest_data_datetime?.split(' ')[0]
+          }));
+
+          const mergedData = [...formattedLiveData, ...unmatched];
+
+          // Sort matched first by date (descending), unmatched go to bottom
+          const sortedData = mergedData.sort((a, b) => {
+            if (!a.latest_data_datetime) return 1;
+            if (!b.latest_data_datetime) return -1;
+            return new Date(b.latest_data_datetime) - new Date(a.latest_data_datetime);
+          });
+
+          setRowData(sortedData);
+          setFilterRow(sortedData);
+
+          const districts = [...new Set(mergedData.map(item => item.district))]
+            .map(d => ({ label: d, value: d }));
+          const taluks = [...new Set(mergedData.map(item => item.taluk))]
+            .map(t => ({ label: t, value: t }));
+
+          setDistrict(districts);
+          setTaluk(taluks);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    fetchData(); // Initial fetch on mount
+    fetchData();
 
-    const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Every 5 mins
-
-    return () => clearInterval(intervalId); // Cleanup on unmount
+    const intervalId = setInterval(fetchData, 5 * 60 * 1000); // Refresh every 5 mins
+    return () => clearInterval(intervalId); // Cleanup
   }, []);
 
 
@@ -411,7 +469,9 @@ const OverView = () => {
             onCellContextMenu={handleCellRightClick}
           />
         ) : (
-          <p className="mt-4">No Data Found</p>
+          <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+            <Loader />
+          </div>
         )}
       </div>
     </>

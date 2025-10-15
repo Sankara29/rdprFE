@@ -5,6 +5,7 @@ import { AgGridReact } from 'ag-grid-react'
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
+import Loader from "../rdprDashboard/Loader";
 
 
 const ComparingReport = () => {
@@ -140,7 +141,9 @@ const ComparingReport = () => {
                         onGridReady={onGridReady}
                         onCellContextMenu={handleCellRightClick}
                     />
-                ) : <p>No Data Found</p>}
+                ) : <><div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+                    <Loader />
+                </div></>}
             </div>
         </>
     )

@@ -156,7 +156,18 @@ root.render(
         <AbilityContext.Provider value={ability}>
           <ThemeContext>
             <LazyApp />
-            <Toaster position={themeConfig.layout.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />
+
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                className: 'react-hot-toast',
+                duration: 3000, // auto close after 3 seconds
+                style: {
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
           </ThemeContext>
         </AbilityContext.Provider>
       </Suspense>

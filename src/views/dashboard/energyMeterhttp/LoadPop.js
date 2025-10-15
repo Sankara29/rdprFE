@@ -11,12 +11,12 @@ import Loader from "../rdprDashboard/Loader";
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 
-const OverView = () => {
+const OverView = ({ node_id, date, rr_no, GP }) => {
     const location = useLocation();
     const navigate = useNavigate()
     const gridRef = useRef()
     const gridRef2 = useRef()
-    const { node_id, date, GP, village, rr_no, pumpHp, population } = location.state || {};
+    // const { node_id, date, GP, village, rr_no, pumpHp, population } = location.state || {};
     const [loadData, setLoadData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ const OverView = () => {
     const [instanData, setInstanData] = useState([]);
     const [connectId, setConnectionId] = useState(null)
     const [billingDetails, setBillingDetails] = useState([])
-    console.log(date)
+    const [PopHB, setPopHB] = useState(null)
 
     const formatDateToComparable = (input) => {
         const d = new Date(input);
@@ -39,7 +39,7 @@ const OverView = () => {
             if (!node_id) return;
             setLoading(true);
             try {
-                const res = await fetch(`${API_URL}/getMeterInfoDataNodeById?node_id=${node_id}`);
+                const res = await fetch(`${API_URL}/getMeterInfoDataNodeById?node_id=${node_id}&datePrefix=${date}`);
                 if (!res.ok) throw new Error("Failed to fetch data");
                 const data = await res.json();
                 setLoadData(data.data.load || []);
@@ -89,7 +89,7 @@ const OverView = () => {
         const fetchTankDetails = async () => {
             if (!node_id) return;
             try {
-                const res = await fetch(`${API_URL}/getTankNodes?node_id=${node_id}`);
+                const res = await fetch(`${API_URL}/getTankNodesByRR?rr_no=${rr_no}`);
                 if (!res.ok) throw new Error("Failed to fetch data");
                 const data = await res.json();
                 setTankDetails(data.data);
@@ -99,7 +99,21 @@ const OverView = () => {
 
         }
         fetchTankDetails()
-    }, [node_id])
+    }, [rr_no])
+    useEffect(() => {
+        const fetchPopHB = async () => {
+            if (!node_id) return;
+            try {
+                const res = await fetch(API_URL + `/getDailyWaterUsage?nodeId=${node_id}`);
+                if (!res.ok) throw new Error("Failed to fetch data");
+                const data = await res.json();
+                setPopHB(data.data[0]);
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        fetchPopHB()
+    }, [])
     useEffect(() => {
         if (!date || loadData.length === 0) {
             setFilteredData([]);
@@ -552,8 +566,8 @@ const OverView = () => {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
             toast.success("Started the relay")
-            const data = await response.json();
-            console.log('Start API Response:', data);
+            // const data = await response.json();
+            // console.log('Start API Response:', data);
 
         } catch (error) {
             toast.error("Error while start relay")
@@ -575,8 +589,8 @@ const OverView = () => {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
             toast.success("Stoped the relay")
-            const data = await response.json();
-            console.log('Stop API Response:', data);
+            // const data = await response.json();
+            // console.log('Stop API Response:', data);
 
         } catch (error) {
             toast.error("Error while stop relay")
@@ -587,7 +601,7 @@ const OverView = () => {
 
     return (
         <div style={{ width: '100%', height: '100%' }}>
-            <Breadcrumb>
+            {/* <Breadcrumb>
                 <BreadcrumbItem active>
                     <Link
                         to={{
@@ -609,19 +623,19 @@ const OverView = () => {
                     </Link>
                 </BreadcrumbItem>
                 <BreadcrumbItem active><a href="/dashboard/dailyUse/nodeId/date">date</a></BreadcrumbItem>
-            </Breadcrumb>
+            </Breadcrumb> */}
 
             <div className="nodeDetails">
                 <h2 style={{ marginTop: '20px', fontFamily: 'monospace', lineHeight: '1.6' }}>
-                    <span style={{ fontWeight: 'bold' }}>RR NO:</span> {rr_no} |
-                    <span style={{ fontWeight: 'bold' }}>GP Name:</span> {GP} |
-                    <span style={{ fontWeight: 'bold' }}>Village:</span> {village} |
-                    <span style={{ fontWeight: 'bold' }}>Population:</span> {population} |
-                    <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {pumpHp} |
+                    {PopHB != null && <> <span style={{ fontWeight: 'bold' }}>RR NO:</span> {PopHB.rr_no ?? ""} |
+                        <span style={{ fontWeight: 'bold' }}>GP Name:</span> {PopHB.GPName ?? ""} |
+                        <span style={{ fontWeight: 'bold' }}>Village:</span> {PopHB.village ?? ""} |
+                        <span style={{ fontWeight: 'bold' }}>Population:</span> {PopHB.population ?? ""} |
+                        <span style={{ fontWeight: 'bold' }}>pumpHp:</span> {PopHB.pumpHB ?? ""} |</>}
                     <span style={{ fontWeight: 'bold' }}>Node:</span> {node_id} |
                     <span style={{ fontWeight: 'bold' }}>Connection ID:</span>{connectId ?? 0} |
                     {tankDetails && <><span style={{ fontWeight: 'bold' }}>Tank Node:</span>{tankDetails?.tank_node ?? 'Null'} |
-                        <span style={{ fontWeight: 'bold' }}>Water Level:</span>{tankDetails?.water_level ?? 'Null'}</>}
+                        <span style={{ fontWeight: 'bold' }}>Water Level:</span>{tankDetails?.water_level ?? 'Null'}|<span style={{ fontWeight: 'bold' }}>Battery:</span>{tankDetails?.battery_percentage ?? 'Null'}</>}
                 </h2>
                 <p style={{
                     fontSize: '18px',
@@ -659,7 +673,7 @@ const OverView = () => {
                         Start Session
                     </h5>
                     <div style={{ display: 'flex', gap: '15px' }}>
-                        <button style={{
+                        {/* <button style={{
                             padding: '10px 20px',
                             backgroundColor: '#3498db',
                             color: 'white',
@@ -674,7 +688,7 @@ const OverView = () => {
                             onMouseOut={e => e.currentTarget.style.backgroundColor = '#3498db'}
                         >
                             Read
-                        </button>
+                        </button> */}
                         <button
                             style={{
                                 padding: '10px 20px',
@@ -691,7 +705,7 @@ const OverView = () => {
                             onMouseOut={e => e.currentTarget.style.backgroundColor = '#27ae60'}
                             onClick={handleStart}
                         >
-                            Start
+                            Pump Start
                         </button>
 
                         <button
@@ -710,7 +724,7 @@ const OverView = () => {
                             onMouseOut={e => e.currentTarget.style.backgroundColor = '#e74c3c'}
                             onClick={handleStop}
                         >
-                            Stop
+                            Pump Stop
                         </button>
 
                     </div>

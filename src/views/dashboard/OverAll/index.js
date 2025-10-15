@@ -14,6 +14,7 @@ import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 import { FileText, Info } from 'react-feather';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../rdprDashboard/Loader';
 const OverView = () => {
     const navigate = useNavigate()
     const [district, setDistrict] = useState([])
@@ -331,7 +332,9 @@ const OverView = () => {
                     onCellContextMenu={handleCellRightClick}
                     onCellClicked={handleCellClick}
                 />
-                    : <p>No Data Found</p>}
+                    : <div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
+                        <Loader />
+                    </div>}
             </div>
         </div>
     )

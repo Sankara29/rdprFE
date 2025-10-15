@@ -12,12 +12,13 @@ import API_URL from '../../../config';
 import Moment from "moment";
 import FlowrateLineChart from "../../charts/lineChart";
 import Loader from "../rdprDashboard/Loader";
-const OverView = () => {
+const OverView = ({ node_id }) => {
     // const [commanData, setCommanData] = useState(null)
 
     const [instData, setInstData] = useState([])
     const location = useLocation();
-    const { node_id } = location.state || {};
+    const [loading, setLoading] = useState(true);
+    // const { node_id } = location.state || {};
     // console.log(node_id)
     useEffect(() => {
         fetch(API_URL + `/getLiveWaterDataByNodeId?node_id=${node_id}`)
@@ -26,7 +27,7 @@ const OverView = () => {
                 if (data.statusCode === 200) {
                     console.log(data)
                     setInstData(data.data);
-
+                    setLoading(false);
                 }
             });
     }, [node_id])
@@ -81,27 +82,7 @@ const OverView = () => {
         },
     }), []);
 
-    // function filterSignificantFlowrates(data) {
-    //     const sorted = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
-    //     return sorted.filter((item, index, arr) => {
-    //       const prev = arr[index - 1];
-    //       const next = arr[index + 1];
-
-    //       if (item.flowrate !== 0 && item.flowrate !== null) return true;
-
-    //       // Keep 0s only if there's a change from or to non-zero
-    //       const beforeWasNonZero = prev && prev.flowrate !== 0 && prev.flowrate !== null;
-    //       const afterWillBeNonZero = next && next.flowrate !== 0 && next.flowrate !== null;
-
-    //       return beforeWasNonZero || afterWillBeNonZero;
-    //     });
-    //   }
-
-    // const sortedData =instData.length>0&& filterSignificantFlowrates(instData)
-
-    //   const categories = instData.length>0&&sortedData.map(item => item.datetime);
-    //   const flowrates = instData.length>0&&sortedData.map(item => item.flowrate);
 
     function computeEnergyUsage(data) {
         const sorted = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
@@ -122,27 +103,8 @@ const OverView = () => {
 
 
     return (
-        <>    <>
+        <>
 
-            <Breadcrumb>
-                <BreadcrumbItem>
-                    <a href="/dashboard/rdprDashboard">
-                        dashboard
-                    </a>
-                </BreadcrumbItem>
-                <BreadcrumbItem>
-                    <a href="/dashboard/watermeter">
-                        watermeter
-                    </a>
-                </BreadcrumbItem>
-                <BreadcrumbItem active>
-                    <a href="/dashboard/watermeter/nodeId">
-                        nodeId
-                    </a>
-                </BreadcrumbItem>
-
-            </Breadcrumb>
-        </>
             <div className="nodeDetails">
 
 
@@ -150,7 +112,9 @@ const OverView = () => {
 
                 {/* <FlowrateLineChart   categories={categories} data={flowrates} /> */}
                 {instData && instData.length > 0 && <FlowrateLineChart rawData={instData} />}
-                {instData && instData.length > 0 ? (
+                {loading ? (
+                    <Loader />
+                ) : instData && instData.length > 0 ? (
 
                     <div className="ag-theme-alpine" style={{ height: '700px', width: '100%' }}>
                         <AgGridReact
@@ -167,7 +131,7 @@ const OverView = () => {
                         />
                     </div>
                 ) : (<div className="ag-theme-alpine" style={{ height: '14px', width: '100%' }}>
-                    <Loader />
+                    <span>No Data Available</span>
                 </div>)}
 
 

@@ -13,6 +13,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { Info } from 'react-feather'
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment/moment'
+import dayjs from 'dayjs'
 
 const OverView = () => {
   const navigate = useNavigate()
@@ -111,7 +112,7 @@ const OverView = () => {
       valueFormatter: (params) => {
 
 
-        return params.value ? moment(params.value).format('MMM-DD-YYYY') : 'Null';
+        return params.value ? dayjs(params.value).format('MMM-DD-YYYY') : 'Null';
       },
 
     }
