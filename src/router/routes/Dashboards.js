@@ -35,6 +35,7 @@ const WaterMeterNodeHttp = lazy(() => import('../../views/dashboard/httpwaterMet
 const GettimeCountField = lazy(() => import('../../views/dashboard/gettimeWithCountField'));
 const Getsession = lazy(() => import('../../views/dashboard/sessionDetails'));
 const Newrrno = lazy(() => import('../../views/dashboard/newRRNO'));
+const Testlog = lazy(() => import('../../views/dashboard/testlog'));
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
 
@@ -206,6 +207,9 @@ const DashboardRoutes = [
   }, {
     path: "/dashboard/newRRNO",
     element: <Newrrno />,
+  }, {
+    path: "/dashboard/testlog",
+    element: <Testlog />,
   },
 ];
 

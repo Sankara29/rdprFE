@@ -200,7 +200,8 @@ const OverView = () => {
         }
 
         if (selectedGP) {
-            filtered = filtered.filter(item => item.GPName === selectedGP.value);
+            filtered = filtered.filter(item => item.gpname === selectedGP.value);
+
         }
 
         if (selectedVillage) {
@@ -214,7 +215,7 @@ const OverView = () => {
     useEffect(() => {
         if (selectedGP) {
             const filteredVillages = rowData
-                .filter(item => item.GPName === selectedGP.value)
+                .filter(item => item.gpname === selectedGP.value)
                 .map(item => item.village);
 
             const uniqueVillages = [...new Set(filteredVillages)]
