@@ -48,7 +48,9 @@ const OverView = () => {
   const [recentNodeCount, setRecentNodeCount] = useState(0)
   const lastRightClickRef = useRef(0)
   const [selectedData, setSelectedData] = useState(null);
-  const [installedWater, setInstalledWater] = useState(0);
+  const [installedWater, setInstalledWater] = useState([]);
+  const [waterTodayCounts, setWaterTodayCounts] = useState(0);
+  const [waterInstCount, setWaterInstCount] = useState(0);
   // Function to calculate the recent node count
   const calculateRecentNodeCount = () => {
     const now = new Date();
@@ -504,6 +506,7 @@ const OverView = () => {
       });
       const waterData = response.data || [];
       setWaterData(data)
+
       setWaterTodayCount(data?.length ?? 0);
       setRowData(prev =>
         prev.map(row => {
@@ -545,7 +548,8 @@ const OverView = () => {
           })
           .then(response => {
             const data = response.data || [];
-            setInstalledWater(data.length)
+            setWaterInstCount(data.length ?? 0);
+            setInstalledWater(data)
           })
       } catch (error) {
         console.log(error)
@@ -609,6 +613,10 @@ const OverView = () => {
   useEffect(() => {
     let filtered = [...rowData]
     let waterDatas = [...waterData]
+    let installedwaters = Array.isArray(installedWater) ? [...installedWater] : [];
+    const today = dayjs();
+
+
 
 
     // if (selectedDistrict) {
@@ -626,7 +634,16 @@ const OverView = () => {
       ].sort();
       setGpOptions(gps.map(item => ({ label: item, value: item })));
       waterDatas = waterDatas.filter(item => item.taluk === selectedTaluk.value)
-      setWaterTodayCount(waterDatas?.length ?? 0);
+      const watertoday = waterDatas.filter(item => {
+        const waterDate = dayjs(item.latest_water_date, 'YYYY-M-D H:m:s');
+        return waterDate.isValid() &&
+          waterDate.year() === today.year() &&
+          waterDate.month() === today.month() &&
+          waterDate.date() === today.date();
+      });
+      setWaterTodayCount(watertoday?.length ?? 0);
+      installedwaters = installedwaters.filter(item => item.taluk === selectedTaluk.value)
+      setWaterInstCount(installedwaters?.length ?? 0);
 
       // Filter Villages for the selected Taluk and remove duplicates
       const villages = [
@@ -648,7 +665,16 @@ const OverView = () => {
     if (selectedGP) {
       filtered = filtered.filter(item => item.GPName === selectedGP.value);
       waterDatas = waterDatas.filter(item => item.GPName === selectedGP.value)
-      setWaterTodayCount(waterDatas?.length ?? 0);
+      const watertoday = waterDatas.filter(item => {
+        const waterDate = dayjs(item.latest_water_date, 'YYYY-M-D H:m:s');
+        return waterDate.isValid() &&
+          waterDate.year() === today.year() &&
+          waterDate.month() === today.month() &&
+          waterDate.date() === today.date();
+      });
+      setWaterTodayCount(watertoday?.length ?? 0);
+      installedwaters = installedwaters.filter(item => item.GPName === selectedGP.value)
+      setWaterInstCount(installedwaters?.length ?? 0);
 
       const villages = [
         ...new Set(
@@ -663,12 +689,23 @@ const OverView = () => {
     if (selectedVillage) {
       filtered = filtered.filter(item => item.village === selectedVillage.value);
       waterDatas = waterDatas.filter(item => item.village === selectedVillage.value)
-      setWaterTodayCount(waterDatas?.length ?? 0);
+      const watertoday = waterDatas.filter(item => {
+        const waterDate = dayjs(item.latest_water_date, 'YYYY-M-D H:m:s');
+        return waterDate.isValid() &&
+          waterDate.year() === today.year() &&
+          waterDate.month() === today.month() &&
+          waterDate.date() === today.date();
+      });
+      setWaterTodayCount(watertoday?.length ?? 0);
+      installedwaters = installedwaters.filter(item => item.village === selectedVillage.value)
+      setWaterInstCount(installedwaters?.length ?? 0);
     }
 
     setFilterRow(filtered)
     setWaterTodayCount(waterDatas?.length ?? 0)
-  }, [selectedDistrict, selectedTaluk, nodeIdFilter, rowData, selectedGP, selectedVillage, waterData])
+    setWaterInstCount(installedwaters?.length ?? 0)
+
+  }, [selectedDistrict, selectedTaluk, nodeIdFilter, rowData, selectedGP, selectedVillage, waterData, installedWater])
 
   const handleCellRightClick = (event) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -761,7 +798,7 @@ const OverView = () => {
     },
     {
       label: 'Water Meter Installed',
-      value: installedWater,
+      value: waterInstCount,
       color: '#f5a623',
       icon: <FaTint />,
     },

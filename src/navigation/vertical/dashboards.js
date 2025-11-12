@@ -30,6 +30,11 @@ export default [
     title: 'Project Status',
     icon: <Circle size={12} />,
     navLink: '/dashboard/energymeterhttp',
+  }, {
+    id: 'MainMap',
+    title: 'Main Map',
+    icon: <Circle size={12} />,
+    navLink: '/dashboard/detailMap',
   },
   // {
   //   id: 'session',

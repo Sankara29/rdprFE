@@ -36,6 +36,7 @@ const GettimeCountField = lazy(() => import('../../views/dashboard/gettimeWithCo
 const Getsession = lazy(() => import('../../views/dashboard/sessionDetails'));
 const Newrrno = lazy(() => import('../../views/dashboard/newRRNO'));
 const Testlog = lazy(() => import('../../views/dashboard/testlog'));
+const MainMap = lazy(() => import('../../views/dashboard/mainmap'));
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
 
@@ -211,6 +212,10 @@ const DashboardRoutes = [
     path: "/dashboard/testlog",
     element: <Testlog />,
   },
+  {
+    path: "/dashboard/detailMap",
+    element: <MainMap />
+  }
 ];
 
 export default DashboardRoutes;

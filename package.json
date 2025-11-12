@@ -20,6 +20,7 @@
     "@mui/base": "^5.0.0-alpha.123",
     "@mui/material": "^5.11.15",
     "@popperjs/core": "^2.11.3",
+    "@react-google-maps/api": "^2.20.7",
     "@reduxjs/toolkit": "^1.2.5",
     "@uidotdev/usehooks": "^2.4.1",
     "ag-grid": "^18.1.2",
