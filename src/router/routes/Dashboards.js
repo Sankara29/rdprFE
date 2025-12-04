@@ -37,6 +37,7 @@ const Getsession = lazy(() => import('../../views/dashboard/sessionDetails'));
 const Newrrno = lazy(() => import('../../views/dashboard/newRRNO'));
 const Testlog = lazy(() => import('../../views/dashboard/testlog'));
 const MainMap = lazy(() => import('../../views/dashboard/mainmap'));
+const GenBill = lazy(() => import('../../views/dashboard/genBill'));
 import { useEffect, useRef, useState } from "react";
 // Inside the iframe script (on the same page as your survey)
 
@@ -125,10 +126,7 @@ const DashboardRoutes = [
     path: "/dashboard/liveData/energyByNodeId",
     element: <DashboardEnergyMeterNodeIdLive />,
   },
-  {
-    path: "/dashboard/energymeterhttp",
-    element: <EnergyMeterHttp />,
-  },
+
   {
     path: "/dashboard/energyByNodeIdhttp",
     element: <EnergyMeterNodeHttp />,
@@ -212,9 +210,24 @@ const DashboardRoutes = [
     path: "/dashboard/testlog",
     element: <Testlog />,
   },
+  //  {
+  //   path: "/dashboard/energymeterhttp",
+  //   element: <EnergyMeterHttp />,
+  // },
+  // {
+  //   path: "/dashboard/detailMap",
+  //   element: <MainMap />
+  // },
+  {
+    path: "/dashboard/energymeterhttp",
+    element: <MainMap />,
+  },
   {
     path: "/dashboard/detailMap",
-    element: <MainMap />
+    element: <EnergyMeterHttp />
+  }, {
+    path: "/dashboard/genbill",
+    element: <GenBill />
   }
 ];
 

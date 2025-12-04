@@ -224,9 +224,13 @@ const containerStyle = {
     height: "100%"
 };
 
+// const center = {
+//     lat: 12.9716,
+//     lng: 77.5946
+// };
 const center = {
-    lat: 12.9716,
-    lng: 77.5946
+    lat: 13.0120,   // approximate latitude for Nelamangala
+    lng: 77.3150    // approximate longitude for Nelamangala
 };
 
 const NodeMap = () => {
@@ -370,7 +374,7 @@ const NodeMap = () => {
         const match = nodeDetails.find(item =>
             !item.node_id?.startsWith("NSGW") && item.node_id?.slice(-4) === status?.slice(-4)
         );
-        let iconPath = "/red.png";
+        let iconPath = "/blue.png";
 
         if (match) {
             const dataTime = new Date(match.realtimeclock);
@@ -378,7 +382,8 @@ const NodeMap = () => {
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
             const isToday = dataTime && dataTime >= startOfToday && dataTime <= now;
-            iconPath = isToday ? "/blue.png" : "/red.png";
+            iconPath = "/blue.png"
+            // iconPath = isToday ? "/blue.png" : "/red.png";
         }
 
         if (!(window.google && window.google.maps)) return undefined;
@@ -404,7 +409,7 @@ const NodeMap = () => {
         <div style={{ width: "100%", height: "80vh" }}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "10px" }}>
                 <h4 onClick={() => router(-1)} style={{ cursor: "pointer" }}></h4>
-                <h2>Starter Node Installed</h2>
+                <h2>Installation Status</h2>
                 {/* <button
                     onClick={handleDownload}
                     style={{

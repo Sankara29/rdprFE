@@ -25,17 +25,33 @@ import {
 
 export default [
 
+  // {
+  //   id: 'httpNodeId',
+  //   title: 'Project Status',
+  //   icon: <Circle size={12} />,
+  //   navLink: '/dashboard/energymeterhttp',
+  // }, {
+  //   id: 'MainMap',
+  //   title: 'Main Map',
+  //   icon: <Circle size={12} />,
+  //   navLink: '/dashboard/detailMap',
+  // },
   {
     id: 'httpNodeId',
-    title: 'Project Status',
+    title: 'Main Map',
     icon: <Circle size={12} />,
     navLink: '/dashboard/energymeterhttp',
   }, {
     id: 'MainMap',
-    title: 'Main Map',
+    title: 'Dashboard',
     icon: <Circle size={12} />,
     navLink: '/dashboard/detailMap',
-  },
+  }, {
+    id: 'genBill',
+    title: 'Generate Bill',
+    icon: <Circle size={12} />,
+    navLink: '/dashboard/genbill',
+  }
   // {
   //   id: 'session',
   //   title: 'session details',
